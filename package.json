@@ -1,0 +1,11 @@
+{
+  "name": "com.lumakroma.modular-depth-animation-sps",
+  "version": "0.1.0",
+  "displayName": "Modular Depth Animation for SPS",
+  "description": "A small helper tool that generates VRCFury Full Controller depth animation setup for SPS sockets.",
+  "unity": "2022.3",
+  "author": {
+    "name": "LumaKroma"
+  },
+  "license": "MIT"
+}
