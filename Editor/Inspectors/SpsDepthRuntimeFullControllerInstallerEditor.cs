@@ -23,6 +23,16 @@ namespace MDA.SpsDepth.Editor {
             public const string FarWeight = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.farWeight);
             public const string NearWeight = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.nearWeight);
             public const string AnimationClip = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.animationClip);
+            public const string MaterialRenderer = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialRenderer);
+            public const string MaterialPropertyName = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialPropertyName);
+            public const string MaterialFarValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialFarValue);
+            public const string MaterialNearValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialNearValue);
+            public const string FxFloatParameterName = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.fxFloatParameterName);
+            public const string FxFloatFarValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.fxFloatFarValue);
+            public const string FxFloatNearValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.fxFloatNearValue);
+            public const string ObjectToggleTarget = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.objectToggleTarget);
+            public const string ObjectToggleFarActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.objectToggleFarActive);
+            public const string ObjectToggleNearActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.objectToggleNearActive);
         }
 
         private int activeSliderControl;
@@ -213,6 +223,16 @@ namespace MDA.SpsDepth.Editor {
             var farWeight = action.FindPropertyRelative(PropertyNames.FarWeight);
             var nearWeight = action.FindPropertyRelative(PropertyNames.NearWeight);
             var animationClip = action.FindPropertyRelative(PropertyNames.AnimationClip);
+            var materialRenderer = action.FindPropertyRelative(PropertyNames.MaterialRenderer);
+            var materialPropertyName = action.FindPropertyRelative(PropertyNames.MaterialPropertyName);
+            var materialFarValue = action.FindPropertyRelative(PropertyNames.MaterialFarValue);
+            var materialNearValue = action.FindPropertyRelative(PropertyNames.MaterialNearValue);
+            var fxFloatParameterName = action.FindPropertyRelative(PropertyNames.FxFloatParameterName);
+            var fxFloatFarValue = action.FindPropertyRelative(PropertyNames.FxFloatFarValue);
+            var fxFloatNearValue = action.FindPropertyRelative(PropertyNames.FxFloatNearValue);
+            var objectToggleTarget = action.FindPropertyRelative(PropertyNames.ObjectToggleTarget);
+            var objectToggleFarActive = action.FindPropertyRelative(PropertyNames.ObjectToggleFarActive);
+            var objectToggleNearActive = action.FindPropertyRelative(PropertyNames.ObjectToggleNearActive);
 
             var title = $"{index + 1}. {GetActionTitle(action)}";
 
@@ -249,6 +269,40 @@ namespace MDA.SpsDepth.Editor {
                         );
                         EditorGUILayout.PropertyField(animationClip, SpsDepthLocalization.Content(SpsDepthLocalization.Key.Clip));
                         break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.MaterialProperty), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.MaterialPropertyHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(materialRenderer, SpsDepthLocalization.Content(SpsDepthLocalization.Key.MaterialRenderer));
+                        EditorGUILayout.PropertyField(materialPropertyName, SpsDepthLocalization.Content(SpsDepthLocalization.Key.MaterialPropertyName));
+                        EditorGUILayout.PropertyField(materialFarValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarValue));
+                        EditorGUILayout.PropertyField(materialNearValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearValue));
+                        break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.SetFxFloat), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.SetFxFloatHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(fxFloatParameterName, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FxFloatParameterName));
+                        EditorGUILayout.PropertyField(fxFloatFarValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarValue));
+                        EditorGUILayout.PropertyField(fxFloatNearValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearValue));
+                        break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.ObjectToggle), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.ObjectToggleHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(objectToggleTarget, SpsDepthLocalization.Content(SpsDepthLocalization.Key.ObjectToggleTarget));
+                        EditorGUILayout.PropertyField(objectToggleFarActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarActive));
+                        EditorGUILayout.PropertyField(objectToggleNearActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearActive));
+                        break;
                 }
             }
 
@@ -258,7 +312,10 @@ namespace MDA.SpsDepth.Editor {
         private static void DrawActionTypePopup(SerializedProperty actionType) {
             var labels = new[] {
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.BlendShape),
-                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip)
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle)
             };
             actionType.enumValueIndex = EditorGUILayout.Popup(
                 SpsDepthLocalization.Content(SpsDepthLocalization.Key.ActionType),
@@ -437,12 +494,28 @@ namespace MDA.SpsDepth.Editor {
             action.FindPropertyRelative(PropertyNames.NearWeight).floatValue = 100f;
 
             action.FindPropertyRelative(PropertyNames.AnimationClip).objectReferenceValue = null;
+
+            action.FindPropertyRelative(PropertyNames.MaterialRenderer).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.MaterialPropertyName).stringValue = string.Empty;
+            action.FindPropertyRelative(PropertyNames.MaterialFarValue).floatValue = 0f;
+            action.FindPropertyRelative(PropertyNames.MaterialNearValue).floatValue = 1f;
+
+            action.FindPropertyRelative(PropertyNames.FxFloatParameterName).stringValue = string.Empty;
+            action.FindPropertyRelative(PropertyNames.FxFloatFarValue).floatValue = 0f;
+            action.FindPropertyRelative(PropertyNames.FxFloatNearValue).floatValue = 1f;
+
+            action.FindPropertyRelative(PropertyNames.ObjectToggleTarget).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.ObjectToggleFarActive).boolValue = false;
+            action.FindPropertyRelative(PropertyNames.ObjectToggleNearActive).boolValue = true;
         }
 
         private static string GetActionTitle(SerializedProperty action) {
             var actionType = action.FindPropertyRelative(PropertyNames.ActionType);
             var blendShapeName = action.FindPropertyRelative(PropertyNames.BlendShapeName);
             var animationClip = action.FindPropertyRelative(PropertyNames.AnimationClip);
+            var materialPropertyName = action.FindPropertyRelative(PropertyNames.MaterialPropertyName);
+            var fxFloatParameterName = action.FindPropertyRelative(PropertyNames.FxFloatParameterName);
+            var objectToggleTarget = action.FindPropertyRelative(PropertyNames.ObjectToggleTarget);
             var title = GetActionTypeLabel(actionType.enumValueIndex);
 
             if (
@@ -459,6 +532,27 @@ namespace MDA.SpsDepth.Editor {
                 return $"{title}: {animationClip.objectReferenceValue.name}";
             }
 
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty &&
+                !string.IsNullOrWhiteSpace(materialPropertyName.stringValue)
+            ) {
+                return $"{title}: {materialPropertyName.stringValue}";
+            }
+
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat &&
+                !string.IsNullOrWhiteSpace(fxFloatParameterName.stringValue)
+            ) {
+                return $"{title}: {fxFloatParameterName.stringValue}";
+            }
+
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle &&
+                objectToggleTarget.objectReferenceValue != null
+            ) {
+                return $"{title}: {objectToggleTarget.objectReferenceValue.name}";
+            }
+
             return title;
         }
 
@@ -468,6 +562,12 @@ namespace MDA.SpsDepth.Editor {
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.BlendShape);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip:
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle);
                 default:
                     return enumValueIndex.ToString();
             }

@@ -90,6 +90,7 @@ namespace MDA.SpsDepth.Editor {
                     avatarRoot,
                     controllerResult.Controller,
                     injectedDepthParam,
+                    controllerResult.GlobalParameters,
                     out var createError
                 )) {
                     Debug.LogError(

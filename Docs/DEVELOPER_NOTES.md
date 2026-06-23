@@ -89,6 +89,9 @@ Depth Action を AnimatorController のレイヤーへ変換する中心です�
 - BlendTree の生成
 - BlendShape 用 AnimationClip の生成
 - Animation Clip action のサンプリング
+- Material Property action の float / range shader property clip 生成
+- Set FX Float action の Animator parameter curve 生成
+- Object Toggle action の GameObject active curve 生成
 - binding path の収集
 
 Action を増やす場合:
@@ -97,6 +100,9 @@ Action を増やす場合:
 - `CreateActionLayer` に分岐を追加する。
 - `ValidateXAction` と `CreateXAction` のように、Action ごとに小さいメソッドへ分ける。
 - Inspector 側にも UI を追加する。
+
+Set FX Float action を増やす・変更する場合は、VRCFury Full Controller の parameter rewrite に注意すること。
+外部の FX layer から読ませる parameter は `globalParams` に入れる必要があるため、`SpsDepthVrcfuryFullControllerFactory` への受け渡しも確認する。
 
 ### `Editor/Build/Animator/SpsDepthActionBuildContext.cs`
 

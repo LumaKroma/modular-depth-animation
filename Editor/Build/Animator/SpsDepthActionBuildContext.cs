@@ -14,6 +14,7 @@ namespace MDA.SpsDepth.Editor {
         public string InjectedDepthParam { get; set; }
         public AnimatorController AnimatorController { get; set; }
         public ICollection<string> BindingPaths { get; set; }
+        public ICollection<string> GlobalParameters { get; set; }
     }
 }
 #endif

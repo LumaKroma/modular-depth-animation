@@ -11,7 +11,10 @@ namespace MDA.SpsDepth {
     public sealed class SpsDepthRuntimeFullControllerInstaller : MonoBehaviour {
         public enum DepthActionType {
             BlendShape,
-            AnimationClip
+            AnimationClip,
+            MaterialProperty,
+            SetFxFloat,
+            ObjectToggle
         }
 
         public enum SocketPreset {
@@ -44,6 +47,26 @@ namespace MDA.SpsDepth {
             public float nearWeight = 100f;
 
             public AnimationClip animationClip;
+
+            public Renderer materialRenderer;
+
+            public string materialPropertyName;
+
+            public float materialFarValue = 0f;
+
+            public float materialNearValue = 1f;
+
+            public string fxFloatParameterName;
+
+            public float fxFloatFarValue = 0f;
+
+            public float fxFloatNearValue = 1f;
+
+            public GameObject objectToggleTarget;
+
+            public bool objectToggleFarActive = false;
+
+            public bool objectToggleNearActive = true;
         }
 
         public SocketPreset socketPreset = SocketPreset.Mouth;

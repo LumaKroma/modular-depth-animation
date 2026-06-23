@@ -21,7 +21,7 @@ Unity 上で `MDA Fury SPS Depth` コンポーネントを追加し、BlendShape
 3. `Target Socket Object` は空のままでも構いません。空の場合はビルド時に自動検出します。
 4. 明示的に指定したい場合は、VRCFury SPS Socket コンポーネントが付いた GameObject を `Target Socket Object` に入れます。
 5. `Depth Action` を追加します。
-6. `BlendShape` または `Animation Clip` を設定します。
+6. `BlendShape`、`Animation Clip`、`Material Property`、`Set FX Float`、`Object Toggle` のいずれかを設定します。
 7. 通常通りアバターをビルドします。
 
 `Target Socket Object` が空、または Missing の場合は、自動検出に切り替わります。対象ソケットが見つからない場合、その Installer はスキップされ、ビルド全体は失敗しません。
@@ -30,6 +30,9 @@ Unity 上で `MDA Fury SPS Depth` コンポーネントを追加し、BlendShape
 
 - `BlendShape`: 指定した BlendShape を Far / Off 側の値から Near / On 側の値へ変化させます。
 - `Animation Clip`: 1つの Animation Clip を Depth に沿ってサンプリングします。先頭フレームが Far / Off、最終フレームが Near / On として扱われます。
+- `Material Property`: Renderer の Material にある float / range 系 shader property を Far / Off 側の値から Near / On 側の値へ変化させます。
+- `Set FX Float`: FX Animator の float parameter を Far / Off 側の値から Near / On 側の値へ変化させます。この parameter は VRCFury Full Controller のマージ時に global parameter として扱われます。
+- `Object Toggle`: GameObject の active 状態を Far / Off 側から Near / On 側へ変化させます。
 
 ## Activation Distance
 

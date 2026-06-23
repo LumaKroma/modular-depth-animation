@@ -42,6 +42,9 @@ namespace MDA.SpsDepth.Editor {
             public const string ActionType = "actionType";
             public const string BlendShape = "blendShape";
             public const string AnimationClip = "animationClip";
+            public const string MaterialProperty = "materialProperty";
+            public const string SetFxFloat = "setFxFloat";
+            public const string ObjectToggle = "objectToggle";
             public const string ActivationDistance = "activationDistance";
             public const string ActivationDistanceTooltip = "activationDistance.tooltip";
             public const string Reset = "reset";
@@ -54,10 +57,24 @@ namespace MDA.SpsDepth.Editor {
             public const string NearWeight = "nearWeight";
             public const string Clip = "clip";
             public const string ClipHelp = "clip.help";
+            public const string MaterialRenderer = "materialRenderer";
+            public const string MaterialPropertyName = "materialPropertyName";
+            public const string MaterialPropertyHelp = "materialProperty.help";
+            public const string FxFloatParameterName = "fxFloatParameterName";
+            public const string SetFxFloatHelp = "setFxFloat.help";
+            public const string FarValue = "farValue";
+            public const string NearValue = "nearValue";
+            public const string ObjectToggleTarget = "objectToggleTarget";
+            public const string ObjectToggleHelp = "objectToggle.help";
+            public const string FarActive = "farActive";
+            public const string NearActive = "nearActive";
             public const string AutoDetectDialogTitle = "autoDetectDialog.title";
             public const string AutoDetectUndo = "autoDetect.undo";
             public const string ActionBlendShape = "action.blendShape";
             public const string ActionAnimationClip = "action.animationClip";
+            public const string ActionMaterialProperty = "action.materialProperty";
+            public const string ActionSetFxFloat = "action.setFxFloat";
+            public const string ActionObjectToggle = "action.objectToggle";
             public const string SocketMouth = "socket.mouth";
             public const string SocketPussy = "socket.pussy";
             public const string SocketAnal = "socket.anal";
@@ -175,6 +192,12 @@ namespace MDA.SpsDepth.Editor {
                     return T(Key.ActionBlendShape);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip:
                     return T(Key.ActionAnimationClip);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty:
+                    return T(Key.ActionMaterialProperty);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat:
+                    return T(Key.ActionSetFxFloat);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
+                    return T(Key.ActionObjectToggle);
                 default:
                     return actionType.ToString();
             }

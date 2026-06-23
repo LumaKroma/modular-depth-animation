@@ -39,12 +39,14 @@ namespace MDA.SpsDepth.Editor {
             animatorController.AddParameter(injectedDepthParam, AnimatorControllerParameterType.Float);
 
             var bindingPaths = new List<string>();
+            var globalParameters = new List<string>();
             var context = new SpsDepthActionBuildContext {
                 AvatarRoot = avatarRoot,
                 Installer = installer,
                 InjectedDepthParam = injectedDepthParam,
                 AnimatorController = animatorController,
-                BindingPaths = bindingPaths
+                BindingPaths = bindingPaths,
+                GlobalParameters = globalParameters
             };
 
             for (var i = 0; i < actions.Length; i++) {
@@ -61,6 +63,7 @@ namespace MDA.SpsDepth.Editor {
                 Controller = animatorController,
                 AssetPath = controllerPath,
                 BindingPath = string.Join(", ", bindingPaths.Distinct()),
+                GlobalParameters = globalParameters.Distinct().ToArray(),
                 Summary = DescribeAnimatorController(animatorController)
             };
             return true;

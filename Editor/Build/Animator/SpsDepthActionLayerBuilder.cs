@@ -31,6 +31,12 @@ namespace MDA.SpsDepth.Editor {
                     return ValidateBlendShapeAction(avatarRoot, action, out error);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip:
                     return ValidateAnimationClipAction(action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty:
+                    return ValidateMaterialPropertyAction(avatarRoot, action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat:
+                    return ValidateSetFxFloatAction(action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
+                    return ValidateObjectToggleAction(avatarRoot, action, out error);
                 default:
                     error = $"Unsupported Depth Action type: {action.actionType}";
                     return false;
@@ -72,6 +78,15 @@ namespace MDA.SpsDepth.Editor {
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip:
                     CreateAnimationClipAction(context, action, actionName, blendTree);
                     break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty:
+                    CreateMaterialPropertyAction(context, action, actionName, blendTree);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat:
+                    CreateSetFxFloatAction(context, action, actionName, blendTree);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
+                    CreateObjectToggleAction(context, action, actionName, blendTree);
+                    break;
                 default:
                     throw new NotSupportedException($"Unsupported Depth Action type: {action.actionType}");
             }
@@ -90,6 +105,27 @@ namespace MDA.SpsDepth.Editor {
                 action.animationClip != null
             ) {
                 return $"Animation Clip {actionIndex + 1} - {action.animationClip.name}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty &&
+                !string.IsNullOrWhiteSpace(action.materialPropertyName)
+            ) {
+                return $"Material Property {actionIndex + 1} - {action.materialPropertyName}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat &&
+                !string.IsNullOrWhiteSpace(action.fxFloatParameterName)
+            ) {
+                return $"Set FX Float {actionIndex + 1} - {action.fxFloatParameterName}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle &&
+                action.objectToggleTarget != null
+            ) {
+                return $"Object Toggle {actionIndex + 1} - {action.objectToggleTarget.name}";
             }
 
             return $"{action.actionType} {actionIndex + 1}";
@@ -160,6 +196,103 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
+        private static bool ValidateMaterialPropertyAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var renderer = action.materialRenderer;
+            if (renderer == null) {
+                error = "Material Renderer is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
+                error =
+                    "Material Renderer must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(action.materialPropertyName)) {
+                error = "Material Property Name is empty.";
+                return false;
+            }
+
+            var materials = renderer.sharedMaterials;
+            if (materials == null || materials.Length == 0 || materials.All(m => m == null)) {
+                error = $"Material Renderer has no shared materials: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            if (!materials.Where(m => m != null).Any(m => IsFloatMaterialProperty(m, action.materialPropertyName))) {
+                error =
+                    $"Float or Range Material Property was not found on renderer materials: \"{action.materialPropertyName}\". " +
+                    $"Renderer: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsFloatMaterialProperty(Material material, string propertyName) {
+            if (material == null || material.shader == null || string.IsNullOrWhiteSpace(propertyName)) {
+                return false;
+            }
+
+            var shader = material.shader;
+            for (var i = 0; i < ShaderUtil.GetPropertyCount(shader); i++) {
+                if (ShaderUtil.GetPropertyName(shader, i) != propertyName) {
+                    continue;
+                }
+
+                var propertyType = ShaderUtil.GetPropertyType(shader, i);
+                return propertyType == ShaderUtil.ShaderPropertyType.Float ||
+                    propertyType == ShaderUtil.ShaderPropertyType.Range;
+            }
+
+            return false;
+        }
+
+        private static bool ValidateSetFxFloatAction(
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            if (string.IsNullOrWhiteSpace(action.fxFloatParameterName)) {
+                error = "FX Float Parameter is empty.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool ValidateObjectToggleAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var target = action.objectToggleTarget;
+            if (target == null) {
+                error = "Object Toggle Target is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
+                error =
+                    "Object Toggle Target must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(target.transform)}";
+                return false;
+            }
+
+            return true;
+        }
+
         private static void CreateBlendShapeAction(
             SpsDepthActionBuildContext context,
             SpsDepthRuntimeFullControllerInstaller.DepthAction action,
@@ -219,6 +352,93 @@ namespace MDA.SpsDepth.Editor {
             }
         }
 
+        private static void CreateMaterialPropertyAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var renderer = action.materialRenderer;
+            var rendererPath = AnimationUtility.CalculateTransformPath(renderer.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(rendererPath);
+
+            var nearClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Near",
+                rendererPath,
+                typeof(Renderer),
+                $"material.{action.materialPropertyName}",
+                action.materialNearValue
+            );
+            var farClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Far",
+                rendererPath,
+                typeof(Renderer),
+                $"material.{action.materialPropertyName}",
+                action.materialFarValue
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
+        private static void CreateSetFxFloatAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            EnsureFloatParameter(context.AnimatorController, action.fxFloatParameterName);
+            context.GlobalParameters.Add(action.fxFloatParameterName);
+            context.BindingPaths.Add($"<FX parameter:{action.fxFloatParameterName}>");
+
+            var nearClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Near",
+                string.Empty,
+                typeof(Animator),
+                action.fxFloatParameterName,
+                action.fxFloatNearValue
+            );
+            var farClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Far",
+                string.Empty,
+                typeof(Animator),
+                action.fxFloatParameterName,
+                action.fxFloatFarValue
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
+        private static void CreateObjectToggleAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var target = action.objectToggleTarget;
+            var targetPath = AnimationUtility.CalculateTransformPath(target.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(string.IsNullOrEmpty(targetPath) ? "<avatar root>" : targetPath);
+
+            var nearClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Near",
+                targetPath,
+                typeof(GameObject),
+                "m_IsActive",
+                action.objectToggleNearActive ? 1f : 0f
+            );
+            var farClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Far",
+                targetPath,
+                typeof(GameObject),
+                "m_IsActive",
+                action.objectToggleFarActive ? 1f : 0f
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
         private static void AddDepthChildren(
             BlendTree blendTree,
             SpsDepthRuntimeFullControllerInstaller.DepthAction action,
@@ -257,6 +477,33 @@ namespace MDA.SpsDepth.Editor {
             );
             AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0f, 1f / 60f, weight));
             return clip;
+        }
+
+        private static AnimationClip CreateFloatCurveClip(
+            string clipName,
+            string path,
+            Type type,
+            string propertyName,
+            float value
+        ) {
+            var clip = new AnimationClip {
+                name = clipName
+            };
+            var binding = EditorCurveBinding.FloatCurve(path, type, propertyName);
+            AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0f, 1f / 60f, value));
+            return clip;
+        }
+
+        private static void EnsureFloatParameter(AnimatorController animatorController, string parameterName) {
+            if (
+                animatorController == null ||
+                string.IsNullOrWhiteSpace(parameterName) ||
+                animatorController.parameters.Any(p => p.name == parameterName)
+            ) {
+                return;
+            }
+
+            animatorController.AddParameter(parameterName, AnimatorControllerParameterType.Float);
         }
 
         private static void AddAnimationClipBindingPaths(AnimationClip clip, ICollection<string> bindingPaths) {

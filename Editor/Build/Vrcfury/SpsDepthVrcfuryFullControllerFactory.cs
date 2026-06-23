@@ -4,6 +4,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -16,6 +17,7 @@ namespace MDA.SpsDepth.Editor {
             GameObject avatarRoot,
             RuntimeAnimatorController controller,
             string injectSpsDepthParam,
+            IEnumerable<string> globalParameters,
             out string error
         ) {
             error = null;
@@ -62,6 +64,7 @@ namespace MDA.SpsDepth.Editor {
 
             SetField(featureInstance, "rootObjOverride", avatarRoot);
             SetField(featureInstance, "rootBindingsApplyToAvatar", true);
+            SetGlobalParameters(featureInstance, globalParameters);
 
             if (!SetField(featureInstance, "injectSpsDepthParam", injectSpsDepthParam)) {
                 error = $"Could not assign injectSpsDepthParam on {fullControllerType.FullName}.";
@@ -76,6 +79,27 @@ namespace MDA.SpsDepth.Editor {
             EditorUtility.SetDirty(vrcfuryComponent);
             TryMarkVrcfuryDirty(vrcfuryComponent);
             return true;
+        }
+
+        private static void SetGlobalParameters(object fullController, IEnumerable<string> globalParameters) {
+            if (fullController == null || globalParameters == null) {
+                return;
+            }
+
+            var listField = fullController.GetType().GetField(
+                "globalParams",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+            );
+            var list = listField?.GetValue(fullController) as IList;
+            if (list == null) {
+                return;
+            }
+
+            foreach (var parameter in globalParameters.Where(p => !string.IsNullOrWhiteSpace(p)).Distinct()) {
+                if (!list.Contains(parameter)) {
+                    list.Add(parameter);
+                }
+            }
         }
 
         private static bool SetControllerList(
