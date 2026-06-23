@@ -1,0 +1,19 @@
+{
+  "name": "MDA.SpsDepth.Editor",
+  "rootNamespace": "MDA.SpsDepth.Editor",
+  "references": [
+    "MDA.SpsDepth.Runtime",
+    "VRC.SDKBase.Editor.BuildPipeline"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

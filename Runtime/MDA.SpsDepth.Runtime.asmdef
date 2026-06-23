@@ -1,0 +1,14 @@
+{
+  "name": "MDA.SpsDepth.Runtime",
+  "rootNamespace": "MDA.SpsDepth",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
