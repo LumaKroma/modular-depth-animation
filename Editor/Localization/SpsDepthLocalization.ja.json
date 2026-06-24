@@ -22,6 +22,7 @@
     { "key": "clearActions.title", "value": "Depth アクションをクリアしますか？" },
     { "key": "clearActions.message", "value": "この Installer からすべての Depth アクションを削除しますか？" },
     { "key": "ok", "value": "OK" },
+    { "key": "copy", "value": "コピー" },
     { "key": "cancel", "value": "キャンセル" },
     { "key": "remove", "value": "削除" },
     { "key": "actionType", "value": "アクションタイプ" },

@@ -38,6 +38,7 @@ namespace MDA.SpsDepth.Editor {
             public const string ClearActionsMessage = "clearActions.message";
             public const string Ok = "ok";
             public const string Cancel = "cancel";
+            public const string Copy = "copy";
             public const string Remove = "remove";
             public const string ActionType = "actionType";
             public const string BlendShape = "blendShape";

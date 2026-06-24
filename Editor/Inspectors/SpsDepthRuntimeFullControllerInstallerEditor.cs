@@ -305,6 +305,12 @@ namespace MDA.SpsDepth.Editor {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.BeginHorizontal();
             action.isExpanded = EditorGUILayout.Foldout(action.isExpanded, title, true);
+            if (GUILayout.Button(SpsDepthLocalization.T(SpsDepthLocalization.Key.Copy), GUILayout.Width(60))) {
+                CopyAction(index);
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+                return;
+            }
             if (GUILayout.Button(SpsDepthLocalization.T(SpsDepthLocalization.Key.Remove), GUILayout.Width(70))) {
                 depthActions.DeleteArrayElementAtIndex(index);
                 EditorGUILayout.EndHorizontal();
@@ -670,6 +676,14 @@ namespace MDA.SpsDepth.Editor {
             var action = depthActions.GetArrayElementAtIndex(index);
             action.isExpanded = true;
             InitializeAction(action, SpsDepthRuntimeFullControllerInstaller.DepthActionType.BlendShape);
+        }
+
+        private void CopyAction(int index) {
+            depthActions.InsertArrayElementAtIndex(index);
+            depthActions.MoveArrayElement(index, index + 1);
+
+            var copy = depthActions.GetArrayElementAtIndex(index + 1);
+            copy.isExpanded = true;
         }
 
         private static void InitializeAction(

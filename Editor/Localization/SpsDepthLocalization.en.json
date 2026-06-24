@@ -23,6 +23,7 @@
     { "key": "clearActions.message", "value": "Remove all depth actions from this installer?" },
     { "key": "ok", "value": "OK" },
     { "key": "cancel", "value": "Cancel" },
+    { "key": "copy", "value": "Copy" },
     { "key": "remove", "value": "Remove" },
     { "key": "actionType", "value": "Action Type" },
     { "key": "blendShape", "value": "BlendShape" },
