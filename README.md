@@ -1,63 +1,91 @@
 # Modular Depth Animation for SPS
 
-VRCFury の SPS Socket に、モジュール的に Depth Animation を追加するための小さな補助ツールです。
+VRCFury の SPS Socket に、距離に応じたアニメーションを追加するための小さな Unity Editor 拡張です。
 
-Unity 上で `MDA Fury SPS Depth` コンポーネントを追加し、BlendShape や Animation Clip を設定すると、ビルド時に対象 SPS Socket の下へ VRCFury Full Controller を自動生成します。
+`MDA Fury SPS Depth` コンポーネントで Action を設定すると、ビルド時に対象 SPS Socket の下へ VRCFury Full Controller を自動生成します。
 
-## 現在の状態
+## できること
 
-このツールは beta 版です。個人的な用途を前提に作っているため、将来の互換性や継続的な保守は保証しません。
+SPS の挿入深度に合わせて、次のような値を変化させられます。
+
+- BlendShape
+- Animation Clip
+- Material Property
+- FX Float parameter
+- Object / Component の ON/OFF
+- Scale
+- Material Swap
+- Poiyomi UV Tile / Flipbook Frame
+- SCSS Shader Inventory
 
 ## 必要なもの
 
-- VRChat アバター用 Unity プロジェクト
+- Unity 2022.3
+- VRChat Avatar SDK
 - VRCFury
-- VRCFury SPS Socket が導入済みのアバター
+- VRCFury SPS Socket が設定済みのアバター
+
+## 導入
+
+Unity Package Manager から、このリポジトリを Git package として追加してください。
+
+```text
+https://github.com/s1f10220274/modular-depth-animation.git
+```
+
+ローカルで編集している場合は、Package Manager の `Add package from disk...` から `package.json` を指定しても使えます。
 
 ## 使い方
 
-1. アバター、または導入用のモジュールオブジェクトに `MDA Fury SPS Depth` を追加します。
-2. `Mouth`、`Pussy`、`Anal`、`Other` などから対象ソケットの種類を選びます。
-3. `Target Socket Object` は空のままでも構いません。空の場合はビルド時に自動検出します。
-4. 明示的に指定したい場合は、VRCFury SPS Socket コンポーネントが付いた GameObject を `Target Socket Object` に入れます。
-5. `Depth Action` を追加します。
-6. `BlendShape`、`Animation Clip`、`Material Property`、`Set FX Float`、`Object Toggle`、`Scale`、`Material Swap`、`Component Toggle`、`Poiyomi UV Tile`、`Poiyomi Flipbook Frame`、`SCSS Shader Inventory` のいずれかを設定します。
-7. 通常通りアバターをビルドします。
+1. アバター、または導入用の子オブジェクトに `MDA Fury SPS Depth` を追加します。
+2. 対象にしたい SPS Socket の種類を選びます。
+3. 必要なら `Target Socket Object` に SPS Socket の GameObject を直接指定します。
+4. `Add Action` で Action を追加します。
+5. Action Type と各設定を入力します。
+6. いつも通りアバターをビルドします。
 
-`Target Socket Object` が空、または Missing の場合は、自動検出に切り替わります。対象ソケットが見つからない場合、その Installer はスキップされ、ビルド全体は失敗しません。
+`Target Socket Object` が空、または Missing の場合は、選択した Socket 種類から自動検出します。対象が見つからない場合、その Installer はスキップされます。
 
-## Action
-
-- `BlendShape`: 指定した BlendShape を Far / Off 側の値から Near / On 側の値へ変化させます。
-- `Animation Clip`: 1つの Animation Clip を Depth に沿ってサンプリングします。先頭フレームが Far / Off、最終フレームが Near / On として扱われます。
-- `Material Property`: Renderer の Material にある float / range、color、vector、texture scale-offset 系 shader property を Far / Off 側の値から Near / On 側の値へ変化させます。
-- `Set FX Float`: FX Animator の float parameter を Far / Off 側の値から Near / On 側の値へ変化させます。この parameter は VRCFury Full Controller のマージ時に global parameter として扱われます。
-- `Object Toggle`: GameObject の active 状態を Far / Off 側から Near / On 側へ変化させます。
-- `Scale`: GameObject の local scale を Far / Off 側の倍率から Near / On 側の倍率へ変化させます。
-- `Material Swap`: Renderer の Material slot を Far / Off 側の material から Near / On 側の material へ差し替えます。
-- `Component Toggle`: enabled property を持つ Component の状態を Far / Off 側から Near / On 側へ変化させます。
-- `Poiyomi UV Tile`: Poiyomi の UV Tile discard / dissolve property を Far / Off 側から Near / On 側へ変化させます。
-- `Poiyomi Flipbook Frame`: Poiyomi の flipbook frame を Far / Off 側から Near / On 側へ変化させます。
-- `SCSS Shader Inventory`: SCSS Shader Inventory の item slot を Far / Off 側から Near / On 側へ変化させます。
+Action は `Copy` / `コピー` ボタンで複製できます。似た設定を複数作るときに使ってください。
 
 ## Activation Distance
 
-- 単位は SPS plug length 基準です。
-- `Entrance` は `0` です。
-- 挿入側、つまり Near 側は負の値です。
-- 外側、つまり Far 側は正の値です。
+`Activation Distance` は SPS plug length 基準です。
+
+- `0`: 入口
+- 負の値: 挿入側、Near / On 側
+- 正の値: 外側、Far / Off 側
+
+基本的には、左側を Near / On、右側を Far / Off と考えると分かりやすいです。
+
+## Action 一覧
+
+| Action | 内容 |
+| --- | --- |
+| `BlendShape` | BlendShape の値を Far / Off から Near / On へ変化させます。 |
+| `Animation Clip` | 1つの Animation Clip を深度に沿ってサンプリングします。先頭が Far / Off、末尾が Near / On です。 |
+| `Material Property` | Renderer の float / range / color / vector / texture scale-offset を変化させます。 |
+| `Set FX Float` | FX Animator の float parameter を変化させます。 |
+| `Object Toggle` | GameObject の active 状態を切り替えます。 |
+| `Scale` | GameObject の local scale を倍率で変化させます。 |
+| `Material Swap` | Renderer の material slot を差し替えます。 |
+| `Component Toggle` | `enabled` を持つ Component の ON/OFF を切り替えます。 |
+| `Poiyomi UV Tile` | Poiyomi の UV Tile discard / dissolve property を切り替えます。 |
+| `Poiyomi Flipbook Frame` | Poiyomi の flipbook frame を切り替えます。 |
+| `SCSS Shader Inventory` | SCSS Shader Inventory の item slot を切り替えます。 |
 
 ## 生成されるもの
 
-ビルド時に、対象 SPS Socket の下へ生成用 GameObject を作成し、その下に VRCFury Full Controller を設定します。
+ビルド時に、対象 SPS Socket の下へ生成用 GameObject を作り、その下に VRCFury Full Controller を設定します。
 
-生成される AnimatorController アセットは `Assets/MDAGenerated` に作成されます。
+生成される AnimatorController アセットは `Assets/MDAGenerated` に作られます。
 
-## その他
+## 注意
 
-- このツールは VRCFury の公式機能ではないので、VRCFury 側の内部構造変更により動かなくなる可能性があります。
-- Full Controller 経由の実装のため、VRCFury SPS Socket の Depth Animation と完全に同じ機能ではありません。
+- このツールは VRCFury 公式の機能ではありません。
+- VRCFury 側の仕様変更により動かなくなる可能性があります。
+- VRCFury SPS Socket 標準の Depth Animation と完全に同じ機能ではありません。
 
-## ライセンス
+## License
 
 MIT License です。詳細は [LICENSE](LICENSE) を参照してください。
