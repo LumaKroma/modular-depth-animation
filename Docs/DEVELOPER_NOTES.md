@@ -105,6 +105,33 @@ Action を増やす場合:
 Set FX Float action を増やす・変更する場合は、VRCFury Full Controller の parameter rewrite に注意すること。
 外部の FX layer から読ませる parameter は `globalParams` に入れる必要があるため、`SpsDepthVrcfuryFullControllerFactory` への受け渡しも確認する。
 
+#### Action Roadmap
+
+実装済み:
+
+- `BlendShape`
+- `Animation Clip`
+- `Material Property` (float / range)
+- `Set FX Float`
+- `Object Toggle`
+- `Scale`
+
+今後追加する Action の優先度:
+
+| Priority | Action | 理由 / 実装メモ |
+| --- | --- | --- |
+| P1 | `Material Swap` | SPS Socket の用途で見た目差分を出しやすい。`Renderer`、material slot、Far / Near material を持たせ、object reference curve を生成する。 |
+| P1 | `Material Property` color/vector/ST 対応 | 既存の `Material Property` を拡張する形で自然。float/range の次に出番が多い。Color / Vector / Texture scale-offset の扱いを分ける。 |
+| P2 | `Component Toggle` | VRCFury の `Object Toggle` とは別に、`Behaviour.m_Enabled` を直接動かしたい場面向け。対象 component を安全に serialize する UI が課題。 |
+| P2 | `Poiyomi UV Tile` | 衣装やエフェクト系で使い道がある。Poiyomi 前提なので、Poiyomi 依存を MDA 側に持ち込まない検証方針が必要。 |
+| P2 | `Poiyomi Flipbook Frame` | depth に応じた段階的な見た目変化に向く。連続値ではなく frame index として扱うため、補間の見え方を確認する。 |
+| P3 | `Reset Physbone` | VRCFury にはあるが、depth blend と相性がよいかは要検討。瞬間的な reset 操作なので、Depth Action として自然か確認してから実装する。 |
+| P3 | `Disable Hand Controls` / `Disable Visemes` / `Disable Blinking` | depth に応じた制御としては特殊用途。実装は可能でも UX が分かりにくいため後回し。 |
+| P4 | `Flipbook Builder` / `Smooth Loop Builder` / `SCSS Shader Inventory` | VRCFury の高水準 builder 系。MDA が直接再実装するより、既存 `Animation Clip` や `Material Property` で代替できる場面が多い。 |
+| P4 | `Enable SPS` / `World Drop` | Depth Action としての意味が薄い、またはビルド時 feature の性格が強い。原則として対象外候補。 |
+
+優先度は固定ではない。実際のユーザー用途で「よく使う SPS Socket Action」が見えてきたら、P2 / P3 は入れ替えてよい。
+
 ### `Editor/Build/Animator/SpsDepthActionBuildContext.cs`
 
 Action 生成時に渡す文脈オブジェクトです。
