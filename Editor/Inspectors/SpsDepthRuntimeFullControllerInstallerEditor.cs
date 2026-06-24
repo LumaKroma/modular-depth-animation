@@ -25,8 +25,17 @@ namespace MDA.SpsDepth.Editor {
             public const string AnimationClip = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.animationClip);
             public const string MaterialRenderer = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialRenderer);
             public const string MaterialPropertyName = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialPropertyName);
+            public const string MaterialPropertyValueType = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialPropertyValueType);
             public const string MaterialFarValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialFarValue);
             public const string MaterialNearValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialNearValue);
+            public const string MaterialFarColor = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialFarColor);
+            public const string MaterialNearColor = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialNearColor);
+            public const string MaterialFarVector = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialFarVector);
+            public const string MaterialNearVector = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialNearVector);
+            public const string MaterialFarTextureScale = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialFarTextureScale);
+            public const string MaterialNearTextureScale = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialNearTextureScale);
+            public const string MaterialFarTextureOffset = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialFarTextureOffset);
+            public const string MaterialNearTextureOffset = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialNearTextureOffset);
             public const string FxFloatParameterName = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.fxFloatParameterName);
             public const string FxFloatFarValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.fxFloatFarValue);
             public const string FxFloatNearValue = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.fxFloatNearValue);
@@ -36,6 +45,10 @@ namespace MDA.SpsDepth.Editor {
             public const string ScaleTarget = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scaleTarget);
             public const string ScaleFarMultiplier = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scaleFarMultiplier);
             public const string ScaleNearMultiplier = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scaleNearMultiplier);
+            public const string MaterialSwapRenderer = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialSwapRenderer);
+            public const string MaterialSwapSlot = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialSwapSlot);
+            public const string MaterialSwapFarMaterial = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialSwapFarMaterial);
+            public const string MaterialSwapNearMaterial = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialSwapNearMaterial);
         }
 
         private int activeSliderControl;
@@ -228,8 +241,17 @@ namespace MDA.SpsDepth.Editor {
             var animationClip = action.FindPropertyRelative(PropertyNames.AnimationClip);
             var materialRenderer = action.FindPropertyRelative(PropertyNames.MaterialRenderer);
             var materialPropertyName = action.FindPropertyRelative(PropertyNames.MaterialPropertyName);
+            var materialPropertyValueType = action.FindPropertyRelative(PropertyNames.MaterialPropertyValueType);
             var materialFarValue = action.FindPropertyRelative(PropertyNames.MaterialFarValue);
             var materialNearValue = action.FindPropertyRelative(PropertyNames.MaterialNearValue);
+            var materialFarColor = action.FindPropertyRelative(PropertyNames.MaterialFarColor);
+            var materialNearColor = action.FindPropertyRelative(PropertyNames.MaterialNearColor);
+            var materialFarVector = action.FindPropertyRelative(PropertyNames.MaterialFarVector);
+            var materialNearVector = action.FindPropertyRelative(PropertyNames.MaterialNearVector);
+            var materialFarTextureScale = action.FindPropertyRelative(PropertyNames.MaterialFarTextureScale);
+            var materialNearTextureScale = action.FindPropertyRelative(PropertyNames.MaterialNearTextureScale);
+            var materialFarTextureOffset = action.FindPropertyRelative(PropertyNames.MaterialFarTextureOffset);
+            var materialNearTextureOffset = action.FindPropertyRelative(PropertyNames.MaterialNearTextureOffset);
             var fxFloatParameterName = action.FindPropertyRelative(PropertyNames.FxFloatParameterName);
             var fxFloatFarValue = action.FindPropertyRelative(PropertyNames.FxFloatFarValue);
             var fxFloatNearValue = action.FindPropertyRelative(PropertyNames.FxFloatNearValue);
@@ -239,6 +261,10 @@ namespace MDA.SpsDepth.Editor {
             var scaleTarget = action.FindPropertyRelative(PropertyNames.ScaleTarget);
             var scaleFarMultiplier = action.FindPropertyRelative(PropertyNames.ScaleFarMultiplier);
             var scaleNearMultiplier = action.FindPropertyRelative(PropertyNames.ScaleNearMultiplier);
+            var materialSwapRenderer = action.FindPropertyRelative(PropertyNames.MaterialSwapRenderer);
+            var materialSwapSlot = action.FindPropertyRelative(PropertyNames.MaterialSwapSlot);
+            var materialSwapFarMaterial = action.FindPropertyRelative(PropertyNames.MaterialSwapFarMaterial);
+            var materialSwapNearMaterial = action.FindPropertyRelative(PropertyNames.MaterialSwapNearMaterial);
 
             var title = $"{index + 1}. {GetActionTitle(action)}";
 
@@ -284,8 +310,20 @@ namespace MDA.SpsDepth.Editor {
                         );
                         EditorGUILayout.PropertyField(materialRenderer, SpsDepthLocalization.Content(SpsDepthLocalization.Key.MaterialRenderer));
                         EditorGUILayout.PropertyField(materialPropertyName, SpsDepthLocalization.Content(SpsDepthLocalization.Key.MaterialPropertyName));
-                        EditorGUILayout.PropertyField(materialFarValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarValue));
-                        EditorGUILayout.PropertyField(materialNearValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearValue));
+                        EditorGUILayout.PropertyField(materialPropertyValueType, SpsDepthLocalization.Content(SpsDepthLocalization.Key.MaterialPropertyValueType));
+                        DrawMaterialPropertyValues(
+                            materialPropertyValueType,
+                            materialFarValue,
+                            materialNearValue,
+                            materialFarColor,
+                            materialNearColor,
+                            materialFarVector,
+                            materialNearVector,
+                            materialFarTextureScale,
+                            materialNearTextureScale,
+                            materialFarTextureOffset,
+                            materialNearTextureOffset
+                        );
                         break;
                     case SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat:
                         EditorGUILayout.Space();
@@ -320,10 +358,57 @@ namespace MDA.SpsDepth.Editor {
                         EditorGUILayout.PropertyField(scaleFarMultiplier, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarScaleMultiplier));
                         EditorGUILayout.PropertyField(scaleNearMultiplier, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearScaleMultiplier));
                         break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.MaterialSwap), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.MaterialSwapHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(materialSwapRenderer, SpsDepthLocalization.Content(SpsDepthLocalization.Key.MaterialSwapRenderer));
+                        EditorGUILayout.PropertyField(materialSwapSlot, SpsDepthLocalization.Content(SpsDepthLocalization.Key.MaterialSwapSlot));
+                        EditorGUILayout.PropertyField(materialSwapFarMaterial, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarMaterial));
+                        EditorGUILayout.PropertyField(materialSwapNearMaterial, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearMaterial));
+                        break;
                 }
             }
 
             EditorGUILayout.EndVertical();
+        }
+
+        private static void DrawMaterialPropertyValues(
+            SerializedProperty materialPropertyValueType,
+            SerializedProperty materialFarValue,
+            SerializedProperty materialNearValue,
+            SerializedProperty materialFarColor,
+            SerializedProperty materialNearColor,
+            SerializedProperty materialFarVector,
+            SerializedProperty materialNearVector,
+            SerializedProperty materialFarTextureScale,
+            SerializedProperty materialNearTextureScale,
+            SerializedProperty materialFarTextureOffset,
+            SerializedProperty materialNearTextureOffset
+        ) {
+            switch ((SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType)materialPropertyValueType.enumValueIndex) {
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Float:
+                    EditorGUILayout.PropertyField(materialFarValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarValue));
+                    EditorGUILayout.PropertyField(materialNearValue, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearValue));
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Color:
+                    EditorGUILayout.PropertyField(materialFarColor, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarColor));
+                    EditorGUILayout.PropertyField(materialNearColor, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearColor));
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Vector:
+                    EditorGUILayout.PropertyField(materialFarVector, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarVector));
+                    EditorGUILayout.PropertyField(materialNearVector, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearVector));
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.TextureScaleOffset:
+                    EditorGUILayout.PropertyField(materialFarTextureScale, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarTextureScale));
+                    EditorGUILayout.PropertyField(materialFarTextureOffset, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarTextureOffset));
+                    EditorGUILayout.PropertyField(materialNearTextureScale, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearTextureScale));
+                    EditorGUILayout.PropertyField(materialNearTextureOffset, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearTextureOffset));
+                    break;
+            }
         }
 
         private static void DrawActionTypePopup(SerializedProperty actionType) {
@@ -333,7 +418,8 @@ namespace MDA.SpsDepth.Editor {
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty),
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat),
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle),
-                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale)
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap)
             };
             actionType.enumValueIndex = EditorGUILayout.Popup(
                 SpsDepthLocalization.Content(SpsDepthLocalization.Key.ActionType),
@@ -515,8 +601,18 @@ namespace MDA.SpsDepth.Editor {
 
             action.FindPropertyRelative(PropertyNames.MaterialRenderer).objectReferenceValue = null;
             action.FindPropertyRelative(PropertyNames.MaterialPropertyName).stringValue = string.Empty;
+            action.FindPropertyRelative(PropertyNames.MaterialPropertyValueType).enumValueIndex =
+                (int)SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Float;
             action.FindPropertyRelative(PropertyNames.MaterialFarValue).floatValue = 0f;
             action.FindPropertyRelative(PropertyNames.MaterialNearValue).floatValue = 1f;
+            action.FindPropertyRelative(PropertyNames.MaterialFarColor).colorValue = Color.black;
+            action.FindPropertyRelative(PropertyNames.MaterialNearColor).colorValue = Color.white;
+            action.FindPropertyRelative(PropertyNames.MaterialFarVector).vector4Value = Vector4.zero;
+            action.FindPropertyRelative(PropertyNames.MaterialNearVector).vector4Value = Vector4.one;
+            action.FindPropertyRelative(PropertyNames.MaterialFarTextureScale).vector2Value = Vector2.one;
+            action.FindPropertyRelative(PropertyNames.MaterialNearTextureScale).vector2Value = Vector2.one;
+            action.FindPropertyRelative(PropertyNames.MaterialFarTextureOffset).vector2Value = Vector2.zero;
+            action.FindPropertyRelative(PropertyNames.MaterialNearTextureOffset).vector2Value = Vector2.zero;
 
             action.FindPropertyRelative(PropertyNames.FxFloatParameterName).stringValue = string.Empty;
             action.FindPropertyRelative(PropertyNames.FxFloatFarValue).floatValue = 0f;
@@ -529,6 +625,11 @@ namespace MDA.SpsDepth.Editor {
             action.FindPropertyRelative(PropertyNames.ScaleTarget).objectReferenceValue = null;
             action.FindPropertyRelative(PropertyNames.ScaleFarMultiplier).floatValue = 1f;
             action.FindPropertyRelative(PropertyNames.ScaleNearMultiplier).floatValue = 1f;
+
+            action.FindPropertyRelative(PropertyNames.MaterialSwapRenderer).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.MaterialSwapSlot).intValue = 0;
+            action.FindPropertyRelative(PropertyNames.MaterialSwapFarMaterial).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.MaterialSwapNearMaterial).objectReferenceValue = null;
         }
 
         private static string GetActionTitle(SerializedProperty action) {
@@ -539,6 +640,7 @@ namespace MDA.SpsDepth.Editor {
             var fxFloatParameterName = action.FindPropertyRelative(PropertyNames.FxFloatParameterName);
             var objectToggleTarget = action.FindPropertyRelative(PropertyNames.ObjectToggleTarget);
             var scaleTarget = action.FindPropertyRelative(PropertyNames.ScaleTarget);
+            var materialSwapRenderer = action.FindPropertyRelative(PropertyNames.MaterialSwapRenderer);
             var title = GetActionTypeLabel(actionType.enumValueIndex);
 
             if (
@@ -583,6 +685,13 @@ namespace MDA.SpsDepth.Editor {
                 return $"{title}: {scaleTarget.objectReferenceValue.name}";
             }
 
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap &&
+                materialSwapRenderer.objectReferenceValue != null
+            ) {
+                return $"{title}: {materialSwapRenderer.objectReferenceValue.name}";
+            }
+
             return title;
         }
 
@@ -600,6 +709,8 @@ namespace MDA.SpsDepth.Editor {
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap);
                 default:
                     return enumValueIndex.ToString();
             }

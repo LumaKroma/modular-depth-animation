@@ -15,7 +15,15 @@ namespace MDA.SpsDepth {
             MaterialProperty,
             SetFxFloat,
             ObjectToggle,
-            Scale
+            Scale,
+            MaterialSwap
+        }
+
+        public enum MaterialPropertyValueType {
+            Float,
+            Color,
+            Vector,
+            TextureScaleOffset
         }
 
         public enum SocketPreset {
@@ -53,9 +61,27 @@ namespace MDA.SpsDepth {
 
             public string materialPropertyName;
 
+            public MaterialPropertyValueType materialPropertyValueType = MaterialPropertyValueType.Float;
+
             public float materialFarValue = 0f;
 
             public float materialNearValue = 1f;
+
+            public Color materialFarColor = Color.black;
+
+            public Color materialNearColor = Color.white;
+
+            public Vector4 materialFarVector = Vector4.zero;
+
+            public Vector4 materialNearVector = Vector4.one;
+
+            public Vector2 materialFarTextureScale = Vector2.one;
+
+            public Vector2 materialNearTextureScale = Vector2.one;
+
+            public Vector2 materialFarTextureOffset = Vector2.zero;
+
+            public Vector2 materialNearTextureOffset = Vector2.zero;
 
             public string fxFloatParameterName;
 
@@ -74,6 +100,14 @@ namespace MDA.SpsDepth {
             public float scaleFarMultiplier = 1f;
 
             public float scaleNearMultiplier = 1f;
+
+            public Renderer materialSwapRenderer;
+
+            public int materialSwapSlot = 0;
+
+            public Material materialSwapFarMaterial;
+
+            public Material materialSwapNearMaterial;
         }
 
         public SocketPreset socketPreset = SocketPreset.Mouth;

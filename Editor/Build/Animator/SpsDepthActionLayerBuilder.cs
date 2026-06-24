@@ -39,6 +39,8 @@ namespace MDA.SpsDepth.Editor {
                     return ValidateObjectToggleAction(avatarRoot, action, out error);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
                     return ValidateScaleAction(avatarRoot, action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
+                    return ValidateMaterialSwapAction(avatarRoot, action, out error);
                 default:
                     error = $"Unsupported Depth Action type: {action.actionType}";
                     return false;
@@ -92,6 +94,9 @@ namespace MDA.SpsDepth.Editor {
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
                     CreateScaleAction(context, action, actionName, blendTree);
                     break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
+                    CreateMaterialSwapAction(context, action, actionName, blendTree);
+                    break;
                 default:
                     throw new NotSupportedException($"Unsupported Depth Action type: {action.actionType}");
             }
@@ -138,6 +143,13 @@ namespace MDA.SpsDepth.Editor {
                 action.scaleTarget != null
             ) {
                 return $"Scale {actionIndex + 1} - {action.scaleTarget.name}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap &&
+                action.materialSwapRenderer != null
+            ) {
+                return $"Material Swap {actionIndex + 1} - {action.materialSwapRenderer.name}";
             }
 
             return $"{action.actionType} {actionIndex + 1}";
@@ -239,9 +251,10 @@ namespace MDA.SpsDepth.Editor {
                 return false;
             }
 
-            if (!materials.Where(m => m != null).Any(m => IsFloatMaterialProperty(m, action.materialPropertyName))) {
+            if (!materials.Where(m => m != null).Any(m => IsCompatibleMaterialProperty(m, action))) {
                 error =
-                    $"Float or Range Material Property was not found on renderer materials: \"{action.materialPropertyName}\". " +
+                    $"{DescribeMaterialPropertyType(action.materialPropertyValueType)} Material Property was not found on renderer materials: " +
+                    $"\"{action.materialPropertyName}\". " +
                     $"Renderer: {GetPath(renderer.transform)}";
                 return false;
             }
@@ -249,11 +262,15 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
-        private static bool IsFloatMaterialProperty(Material material, string propertyName) {
-            if (material == null || material.shader == null || string.IsNullOrWhiteSpace(propertyName)) {
+        private static bool IsCompatibleMaterialProperty(
+            Material material,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action
+        ) {
+            if (material == null || material.shader == null || string.IsNullOrWhiteSpace(action.materialPropertyName)) {
                 return false;
             }
 
+            var propertyName = GetShaderLookupMaterialPropertyName(action);
             var shader = material.shader;
             for (var i = 0; i < ShaderUtil.GetPropertyCount(shader); i++) {
                 if (ShaderUtil.GetPropertyName(shader, i) != propertyName) {
@@ -261,11 +278,71 @@ namespace MDA.SpsDepth.Editor {
                 }
 
                 var propertyType = ShaderUtil.GetPropertyType(shader, i);
-                return propertyType == ShaderUtil.ShaderPropertyType.Float ||
-                    propertyType == ShaderUtil.ShaderPropertyType.Range;
+                switch (action.materialPropertyValueType) {
+                    case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Float:
+                        return propertyType == ShaderUtil.ShaderPropertyType.Float ||
+                            propertyType == ShaderUtil.ShaderPropertyType.Range;
+                    case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Color:
+                        return propertyType == ShaderUtil.ShaderPropertyType.Color;
+                    case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Vector:
+                        return propertyType == ShaderUtil.ShaderPropertyType.Vector;
+                    case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.TextureScaleOffset:
+                        return propertyType == ShaderUtil.ShaderPropertyType.TexEnv;
+                    default:
+                        return false;
+                }
             }
 
             return false;
+        }
+
+        private static string GetShaderLookupMaterialPropertyName(
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action
+        ) {
+            var propertyName = action.materialPropertyName?.Trim();
+            if (
+                action.materialPropertyValueType ==
+                    SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.TextureScaleOffset &&
+                propertyName != null &&
+                propertyName.EndsWith("_ST", StringComparison.Ordinal)
+            ) {
+                return propertyName.Substring(0, propertyName.Length - 3);
+            }
+
+            return propertyName;
+        }
+
+        private static string GetAnimatedMaterialPropertyName(
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action
+        ) {
+            var propertyName = action.materialPropertyName?.Trim();
+            if (
+                action.materialPropertyValueType ==
+                    SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.TextureScaleOffset &&
+                propertyName != null &&
+                !propertyName.EndsWith("_ST", StringComparison.Ordinal)
+            ) {
+                return propertyName + "_ST";
+            }
+
+            return propertyName;
+        }
+
+        private static string DescribeMaterialPropertyType(
+            SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType valueType
+        ) {
+            switch (valueType) {
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Float:
+                    return "Float or Range";
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Color:
+                    return "Color";
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Vector:
+                    return "Vector";
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.TextureScaleOffset:
+                    return "Texture Scale+Offset";
+                default:
+                    return valueType.ToString();
+            }
         }
 
         private static bool ValidateSetFxFloatAction(
@@ -322,6 +399,52 @@ namespace MDA.SpsDepth.Editor {
                 error =
                     "Scale Target must be the avatar root or one of its children. " +
                     $"Assigned object: {GetPath(target.transform)}";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool ValidateMaterialSwapAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var renderer = action.materialSwapRenderer;
+            if (renderer == null) {
+                error = "Material Swap Renderer is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
+                error =
+                    "Material Swap Renderer must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            var materials = renderer.sharedMaterials;
+            if (materials == null || materials.Length == 0) {
+                error = $"Material Swap Renderer has no shared materials: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            if (action.materialSwapSlot < 0 || action.materialSwapSlot >= materials.Length) {
+                error =
+                    $"Material Swap Slot is out of range: {action.materialSwapSlot}. " +
+                    $"Renderer: {GetPath(renderer.transform)}, Slot count: {materials.Length}";
+                return false;
+            }
+
+            if (action.materialSwapNearMaterial == null) {
+                error = "Material Swap Near / On Material is not assigned.";
+                return false;
+            }
+
+            if (action.materialSwapFarMaterial == null && materials[action.materialSwapSlot] == null) {
+                error = "Material Swap Far / Off Material is empty and the current renderer slot has no material.";
                 return false;
             }
 
@@ -397,19 +520,28 @@ namespace MDA.SpsDepth.Editor {
             var rendererPath = AnimationUtility.CalculateTransformPath(renderer.transform, context.AvatarRoot.transform);
             context.BindingPaths.Add(rendererPath);
 
-            var nearClip = CreateFloatCurveClip(
+            var propertyName = GetAnimatedMaterialPropertyName(action);
+            var nearClip = CreateMaterialPropertyClip(
                 $"SPS Depth {actionName} Near",
                 rendererPath,
-                typeof(Renderer),
-                $"material.{action.materialPropertyName}",
-                action.materialNearValue
+                propertyName,
+                action.materialPropertyValueType,
+                action.materialNearValue,
+                action.materialNearColor,
+                action.materialNearVector,
+                action.materialNearTextureScale,
+                action.materialNearTextureOffset
             );
-            var farClip = CreateFloatCurveClip(
+            var farClip = CreateMaterialPropertyClip(
                 $"SPS Depth {actionName} Far",
                 rendererPath,
-                typeof(Renderer),
-                $"material.{action.materialPropertyName}",
-                action.materialFarValue
+                propertyName,
+                action.materialPropertyValueType,
+                action.materialFarValue,
+                action.materialFarColor,
+                action.materialFarVector,
+                action.materialFarTextureScale,
+                action.materialFarTextureOffset
             );
             AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
             AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
@@ -500,6 +632,39 @@ namespace MDA.SpsDepth.Editor {
             AddDepthChildren(blendTree, action, nearClip, farClip);
         }
 
+        private static void CreateMaterialSwapAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var renderer = action.materialSwapRenderer;
+            var rendererPath = AnimationUtility.CalculateTransformPath(renderer.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(rendererPath);
+
+            var farMaterial = action.materialSwapFarMaterial != null
+                ? action.materialSwapFarMaterial
+                : renderer.sharedMaterials[action.materialSwapSlot];
+            var propertyName = $"m_Materials.Array.data[{action.materialSwapSlot}]";
+            var nearClip = CreateObjectReferenceCurveClip(
+                $"SPS Depth {actionName} Near",
+                rendererPath,
+                renderer.GetType(),
+                propertyName,
+                action.materialSwapNearMaterial
+            );
+            var farClip = CreateObjectReferenceCurveClip(
+                $"SPS Depth {actionName} Far",
+                rendererPath,
+                renderer.GetType(),
+                propertyName,
+                farMaterial
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
         private static void AddDepthChildren(
             BlendTree blendTree,
             SpsDepthRuntimeFullControllerInstaller.DepthAction action,
@@ -560,6 +725,86 @@ namespace MDA.SpsDepth.Editor {
             };
             var binding = EditorCurveBinding.FloatCurve(path, type, propertyName);
             AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0f, 1f / 60f, value));
+            return clip;
+        }
+
+        private static AnimationClip CreateMaterialPropertyClip(
+            string clipName,
+            string path,
+            string propertyName,
+            SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType valueType,
+            float floatValue,
+            Color colorValue,
+            Vector4 vectorValue,
+            Vector2 textureScale,
+            Vector2 textureOffset
+        ) {
+            var clip = new AnimationClip {
+                name = clipName
+            };
+            var propertyPrefix = $"material.{propertyName}";
+
+            switch (valueType) {
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Float:
+                    SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix, floatValue);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Color:
+                    SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".r", colorValue.r);
+                    SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".g", colorValue.g);
+                    SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".b", colorValue.b);
+                    SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".a", colorValue.a);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.Vector:
+                    SetVector4MaterialPropertyCurves(clip, path, propertyPrefix, vectorValue);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.MaterialPropertyValueType.TextureScaleOffset:
+                    SetVector4MaterialPropertyCurves(
+                        clip,
+                        path,
+                        propertyPrefix,
+                        new Vector4(textureScale.x, textureScale.y, textureOffset.x, textureOffset.y)
+                    );
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported Material Property value type: {valueType}");
+            }
+
+            return clip;
+        }
+
+        private static void SetVector4MaterialPropertyCurves(
+            AnimationClip clip,
+            string path,
+            string propertyPrefix,
+            Vector4 value
+        ) {
+            SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".x", value.x);
+            SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".y", value.y);
+            SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".z", value.z);
+            SetConstantFloatCurve(clip, path, typeof(Renderer), propertyPrefix + ".w", value.w);
+        }
+
+        private static AnimationClip CreateObjectReferenceCurveClip(
+            string clipName,
+            string path,
+            Type type,
+            string propertyName,
+            UnityEngine.Object value
+        ) {
+            var clip = new AnimationClip {
+                name = clipName
+            };
+            var binding = EditorCurveBinding.PPtrCurve(path, type, propertyName);
+            AnimationUtility.SetObjectReferenceCurve(
+                clip,
+                binding,
+                new[] {
+                    new ObjectReferenceKeyframe {
+                        time = 0f,
+                        value = value
+                    }
+                }
+            );
             return clip;
         }
 

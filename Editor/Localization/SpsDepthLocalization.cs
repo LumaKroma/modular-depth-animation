@@ -46,6 +46,7 @@ namespace MDA.SpsDepth.Editor {
             public const string SetFxFloat = "setFxFloat";
             public const string ObjectToggle = "objectToggle";
             public const string Scale = "scale";
+            public const string MaterialSwap = "materialSwap";
             public const string ActivationDistance = "activationDistance";
             public const string ActivationDistanceTooltip = "activationDistance.tooltip";
             public const string Reset = "reset";
@@ -60,7 +61,16 @@ namespace MDA.SpsDepth.Editor {
             public const string ClipHelp = "clip.help";
             public const string MaterialRenderer = "materialRenderer";
             public const string MaterialPropertyName = "materialPropertyName";
+            public const string MaterialPropertyValueType = "materialPropertyValueType";
             public const string MaterialPropertyHelp = "materialProperty.help";
+            public const string FarColor = "farColor";
+            public const string NearColor = "nearColor";
+            public const string FarVector = "farVector";
+            public const string NearVector = "nearVector";
+            public const string FarTextureScale = "farTextureScale";
+            public const string NearTextureScale = "nearTextureScale";
+            public const string FarTextureOffset = "farTextureOffset";
+            public const string NearTextureOffset = "nearTextureOffset";
             public const string FxFloatParameterName = "fxFloatParameterName";
             public const string SetFxFloatHelp = "setFxFloat.help";
             public const string FarValue = "farValue";
@@ -73,6 +83,11 @@ namespace MDA.SpsDepth.Editor {
             public const string ScaleHelp = "scale.help";
             public const string FarScaleMultiplier = "farScaleMultiplier";
             public const string NearScaleMultiplier = "nearScaleMultiplier";
+            public const string MaterialSwapRenderer = "materialSwapRenderer";
+            public const string MaterialSwapHelp = "materialSwap.help";
+            public const string MaterialSwapSlot = "materialSwapSlot";
+            public const string FarMaterial = "farMaterial";
+            public const string NearMaterial = "nearMaterial";
             public const string AutoDetectDialogTitle = "autoDetectDialog.title";
             public const string AutoDetectUndo = "autoDetect.undo";
             public const string ActionBlendShape = "action.blendShape";
@@ -81,6 +96,7 @@ namespace MDA.SpsDepth.Editor {
             public const string ActionSetFxFloat = "action.setFxFloat";
             public const string ActionObjectToggle = "action.objectToggle";
             public const string ActionScale = "action.scale";
+            public const string ActionMaterialSwap = "action.materialSwap";
             public const string SocketMouth = "socket.mouth";
             public const string SocketPussy = "socket.pussy";
             public const string SocketAnal = "socket.anal";
@@ -206,6 +222,8 @@ namespace MDA.SpsDepth.Editor {
                     return T(Key.ActionObjectToggle);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
                     return T(Key.ActionScale);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
+                    return T(Key.ActionMaterialSwap);
                 default:
                     return actionType.ToString();
             }
