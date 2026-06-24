@@ -27,13 +27,9 @@ SPS の挿入深度に合わせて、次のような値を変化させられま�
 
 ## 導入
 
-Unity Package Manager から、このリポジトリを Git package として追加してください。
+β版の間は、配布された `.unitypackage` を Unity にインポートしてください。
 
-```text
-https://github.com/s1f10220274/modular-depth-animation.git
-```
-
-ローカルで編集している場合は、Package Manager の `Add package from disk...` から `package.json` を指定しても使えます。
+正式公開する場合は、VCC / ALCOM から追加できる VPM package として配布する予定です。
 
 ## 使い方
 
