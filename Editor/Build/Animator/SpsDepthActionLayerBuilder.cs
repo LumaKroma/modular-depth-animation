@@ -37,6 +37,8 @@ namespace MDA.SpsDepth.Editor {
                     return ValidateSetFxFloatAction(action, out error);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
                     return ValidateObjectToggleAction(avatarRoot, action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
+                    return ValidateScaleAction(avatarRoot, action, out error);
                 default:
                     error = $"Unsupported Depth Action type: {action.actionType}";
                     return false;
@@ -53,7 +55,7 @@ namespace MDA.SpsDepth.Editor {
             }
 
             var layerIndex = actionIndex;
-            var actionName = GetActionName(action, actionIndex);
+            var actionName = SanitizeAnimatorName(GetActionName(action, actionIndex));
             var state = context.AnimatorController.CreateBlendTreeInController(
                 actionName,
                 out var blendTree,
@@ -86,6 +88,9 @@ namespace MDA.SpsDepth.Editor {
                     break;
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
                     CreateObjectToggleAction(context, action, actionName, blendTree);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
+                    CreateScaleAction(context, action, actionName, blendTree);
                     break;
                 default:
                     throw new NotSupportedException($"Unsupported Depth Action type: {action.actionType}");
@@ -126,6 +131,13 @@ namespace MDA.SpsDepth.Editor {
                 action.objectToggleTarget != null
             ) {
                 return $"Object Toggle {actionIndex + 1} - {action.objectToggleTarget.name}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale &&
+                action.scaleTarget != null
+            ) {
+                return $"Scale {actionIndex + 1} - {action.scaleTarget.name}";
             }
 
             return $"{action.actionType} {actionIndex + 1}";
@@ -293,6 +305,29 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
+        private static bool ValidateScaleAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var target = action.scaleTarget;
+            if (target == null) {
+                error = "Scale Target is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
+                error =
+                    "Scale Target must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(target.transform)}";
+                return false;
+            }
+
+            return true;
+        }
+
         private static void CreateBlendShapeAction(
             SpsDepthActionBuildContext context,
             SpsDepthRuntimeFullControllerInstaller.DepthAction action,
@@ -439,6 +474,32 @@ namespace MDA.SpsDepth.Editor {
             AddDepthChildren(blendTree, action, nearClip, farClip);
         }
 
+        private static void CreateScaleAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var target = action.scaleTarget;
+            var targetPath = AnimationUtility.CalculateTransformPath(target.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(string.IsNullOrEmpty(targetPath) ? "<avatar root>" : targetPath);
+
+            var localScale = target.transform.localScale;
+            var nearClip = CreateScaleClip(
+                $"SPS Depth {actionName} Near",
+                targetPath,
+                localScale * action.scaleNearMultiplier
+            );
+            var farClip = CreateScaleClip(
+                $"SPS Depth {actionName} Far",
+                targetPath,
+                localScale * action.scaleFarMultiplier
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
         private static void AddDepthChildren(
             BlendTree blendTree,
             SpsDepthRuntimeFullControllerInstaller.DepthAction action,
@@ -457,8 +518,16 @@ namespace MDA.SpsDepth.Editor {
             var layers = animatorController.layers;
             if (layerIndex < 0 || layerIndex >= layers.Length) return;
 
-            layers[layerIndex].name = layerName.Replace(".", "");
+            layers[layerIndex].name = SanitizeAnimatorName(layerName);
             animatorController.layers = layers;
+        }
+
+        private static string SanitizeAnimatorName(string name) {
+            if (string.IsNullOrWhiteSpace(name)) {
+                return "SPS Depth Action";
+            }
+
+            return name.Replace(".", "_");
         }
 
         private static AnimationClip CreateBlendShapeClip(
@@ -492,6 +561,27 @@ namespace MDA.SpsDepth.Editor {
             var binding = EditorCurveBinding.FloatCurve(path, type, propertyName);
             AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0f, 1f / 60f, value));
             return clip;
+        }
+
+        private static AnimationClip CreateScaleClip(string clipName, string path, Vector3 scale) {
+            var clip = new AnimationClip {
+                name = clipName
+            };
+            SetConstantFloatCurve(clip, path, typeof(Transform), "m_LocalScale.x", scale.x);
+            SetConstantFloatCurve(clip, path, typeof(Transform), "m_LocalScale.y", scale.y);
+            SetConstantFloatCurve(clip, path, typeof(Transform), "m_LocalScale.z", scale.z);
+            return clip;
+        }
+
+        private static void SetConstantFloatCurve(
+            AnimationClip clip,
+            string path,
+            Type type,
+            string propertyName,
+            float value
+        ) {
+            var binding = EditorCurveBinding.FloatCurve(path, type, propertyName);
+            AnimationUtility.SetEditorCurve(clip, binding, AnimationCurve.Constant(0f, 1f / 60f, value));
         }
 
         private static void EnsureFloatParameter(AnimatorController animatorController, string parameterName) {

@@ -14,7 +14,8 @@ namespace MDA.SpsDepth {
             AnimationClip,
             MaterialProperty,
             SetFxFloat,
-            ObjectToggle
+            ObjectToggle,
+            Scale
         }
 
         public enum SocketPreset {
@@ -67,6 +68,12 @@ namespace MDA.SpsDepth {
             public bool objectToggleFarActive = false;
 
             public bool objectToggleNearActive = true;
+
+            public GameObject scaleTarget;
+
+            public float scaleFarMultiplier = 1f;
+
+            public float scaleNearMultiplier = 1f;
         }
 
         public SocketPreset socketPreset = SocketPreset.Mouth;

@@ -92,6 +92,7 @@ Depth Action を AnimatorController のレイヤーへ変換する中心です�
 - Material Property action の float / range shader property clip 生成
 - Set FX Float action の Animator parameter curve 生成
 - Object Toggle action の GameObject active curve 生成
+- Scale action の Transform localScale curve 生成
 - binding path の収集
 
 Action を増やす場合:

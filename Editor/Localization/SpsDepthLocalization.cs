@@ -45,6 +45,7 @@ namespace MDA.SpsDepth.Editor {
             public const string MaterialProperty = "materialProperty";
             public const string SetFxFloat = "setFxFloat";
             public const string ObjectToggle = "objectToggle";
+            public const string Scale = "scale";
             public const string ActivationDistance = "activationDistance";
             public const string ActivationDistanceTooltip = "activationDistance.tooltip";
             public const string Reset = "reset";
@@ -68,6 +69,10 @@ namespace MDA.SpsDepth.Editor {
             public const string ObjectToggleHelp = "objectToggle.help";
             public const string FarActive = "farActive";
             public const string NearActive = "nearActive";
+            public const string ScaleTarget = "scaleTarget";
+            public const string ScaleHelp = "scale.help";
+            public const string FarScaleMultiplier = "farScaleMultiplier";
+            public const string NearScaleMultiplier = "nearScaleMultiplier";
             public const string AutoDetectDialogTitle = "autoDetectDialog.title";
             public const string AutoDetectUndo = "autoDetect.undo";
             public const string ActionBlendShape = "action.blendShape";
@@ -75,6 +80,7 @@ namespace MDA.SpsDepth.Editor {
             public const string ActionMaterialProperty = "action.materialProperty";
             public const string ActionSetFxFloat = "action.setFxFloat";
             public const string ActionObjectToggle = "action.objectToggle";
+            public const string ActionScale = "action.scale";
             public const string SocketMouth = "socket.mouth";
             public const string SocketPussy = "socket.pussy";
             public const string SocketAnal = "socket.anal";
@@ -198,6 +204,8 @@ namespace MDA.SpsDepth.Editor {
                     return T(Key.ActionSetFxFloat);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
                     return T(Key.ActionObjectToggle);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
+                    return T(Key.ActionScale);
                 default:
                     return actionType.ToString();
             }

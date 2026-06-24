@@ -33,6 +33,9 @@ namespace MDA.SpsDepth.Editor {
             public const string ObjectToggleTarget = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.objectToggleTarget);
             public const string ObjectToggleFarActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.objectToggleFarActive);
             public const string ObjectToggleNearActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.objectToggleNearActive);
+            public const string ScaleTarget = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scaleTarget);
+            public const string ScaleFarMultiplier = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scaleFarMultiplier);
+            public const string ScaleNearMultiplier = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scaleNearMultiplier);
         }
 
         private int activeSliderControl;
@@ -233,6 +236,9 @@ namespace MDA.SpsDepth.Editor {
             var objectToggleTarget = action.FindPropertyRelative(PropertyNames.ObjectToggleTarget);
             var objectToggleFarActive = action.FindPropertyRelative(PropertyNames.ObjectToggleFarActive);
             var objectToggleNearActive = action.FindPropertyRelative(PropertyNames.ObjectToggleNearActive);
+            var scaleTarget = action.FindPropertyRelative(PropertyNames.ScaleTarget);
+            var scaleFarMultiplier = action.FindPropertyRelative(PropertyNames.ScaleFarMultiplier);
+            var scaleNearMultiplier = action.FindPropertyRelative(PropertyNames.ScaleNearMultiplier);
 
             var title = $"{index + 1}. {GetActionTitle(action)}";
 
@@ -303,6 +309,17 @@ namespace MDA.SpsDepth.Editor {
                         EditorGUILayout.PropertyField(objectToggleFarActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarActive));
                         EditorGUILayout.PropertyField(objectToggleNearActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearActive));
                         break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.Scale), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.ScaleHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(scaleTarget, SpsDepthLocalization.Content(SpsDepthLocalization.Key.ScaleTarget));
+                        EditorGUILayout.PropertyField(scaleFarMultiplier, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarScaleMultiplier));
+                        EditorGUILayout.PropertyField(scaleNearMultiplier, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearScaleMultiplier));
+                        break;
                 }
             }
 
@@ -315,7 +332,8 @@ namespace MDA.SpsDepth.Editor {
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.AnimationClip),
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialProperty),
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat),
-                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle)
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale)
             };
             actionType.enumValueIndex = EditorGUILayout.Popup(
                 SpsDepthLocalization.Content(SpsDepthLocalization.Key.ActionType),
@@ -507,6 +525,10 @@ namespace MDA.SpsDepth.Editor {
             action.FindPropertyRelative(PropertyNames.ObjectToggleTarget).objectReferenceValue = null;
             action.FindPropertyRelative(PropertyNames.ObjectToggleFarActive).boolValue = false;
             action.FindPropertyRelative(PropertyNames.ObjectToggleNearActive).boolValue = true;
+
+            action.FindPropertyRelative(PropertyNames.ScaleTarget).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.ScaleFarMultiplier).floatValue = 1f;
+            action.FindPropertyRelative(PropertyNames.ScaleNearMultiplier).floatValue = 1f;
         }
 
         private static string GetActionTitle(SerializedProperty action) {
@@ -516,6 +538,7 @@ namespace MDA.SpsDepth.Editor {
             var materialPropertyName = action.FindPropertyRelative(PropertyNames.MaterialPropertyName);
             var fxFloatParameterName = action.FindPropertyRelative(PropertyNames.FxFloatParameterName);
             var objectToggleTarget = action.FindPropertyRelative(PropertyNames.ObjectToggleTarget);
+            var scaleTarget = action.FindPropertyRelative(PropertyNames.ScaleTarget);
             var title = GetActionTypeLabel(actionType.enumValueIndex);
 
             if (
@@ -553,6 +576,13 @@ namespace MDA.SpsDepth.Editor {
                 return $"{title}: {objectToggleTarget.objectReferenceValue.name}";
             }
 
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale &&
+                scaleTarget.objectReferenceValue != null
+            ) {
+                return $"{title}: {scaleTarget.objectReferenceValue.name}";
+            }
+
             return title;
         }
 
@@ -568,6 +598,8 @@ namespace MDA.SpsDepth.Editor {
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle:
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale);
                 default:
                     return enumValueIndex.ToString();
             }
