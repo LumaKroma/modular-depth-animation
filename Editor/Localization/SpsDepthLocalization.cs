@@ -47,6 +47,10 @@ namespace MDA.SpsDepth.Editor {
             public const string ObjectToggle = "objectToggle";
             public const string Scale = "scale";
             public const string MaterialSwap = "materialSwap";
+            public const string ComponentToggle = "componentToggle";
+            public const string PoiyomiUvTile = "poiyomiUvTile";
+            public const string PoiyomiFlipbookFrame = "poiyomiFlipbookFrame";
+            public const string ScssShaderInventory = "scssShaderInventory";
             public const string ActivationDistance = "activationDistance";
             public const string ActivationDistanceTooltip = "activationDistance.tooltip";
             public const string Reset = "reset";
@@ -88,6 +92,22 @@ namespace MDA.SpsDepth.Editor {
             public const string MaterialSwapSlot = "materialSwapSlot";
             public const string FarMaterial = "farMaterial";
             public const string NearMaterial = "nearMaterial";
+            public const string ComponentToggleTarget = "componentToggleTarget";
+            public const string ComponentToggleHelp = "componentToggle.help";
+            public const string FarEnabled = "farEnabled";
+            public const string NearEnabled = "nearEnabled";
+            public const string PoiyomiRenderer = "poiyomiRenderer";
+            public const string PoiyomiUvTileHelp = "poiyomiUvTile.help";
+            public const string PoiyomiUvTileRow = "poiyomiUvTileRow";
+            public const string PoiyomiUvTileColumn = "poiyomiUvTileColumn";
+            public const string PoiyomiUvTileUseDissolve = "poiyomiUvTileUseDissolve";
+            public const string PoiyomiUvTileRenamedMaterial = "poiyomiUvTileRenamedMaterial";
+            public const string PoiyomiFlipbookFrameHelp = "poiyomiFlipbookFrame.help";
+            public const string FarFrame = "farFrame";
+            public const string NearFrame = "nearFrame";
+            public const string ScssShaderInventoryRenderer = "scssShaderInventoryRenderer";
+            public const string ScssShaderInventoryHelp = "scssShaderInventory.help";
+            public const string ScssShaderInventorySlot = "scssShaderInventorySlot";
             public const string AutoDetectDialogTitle = "autoDetectDialog.title";
             public const string AutoDetectUndo = "autoDetect.undo";
             public const string ActionBlendShape = "action.blendShape";
@@ -97,6 +117,10 @@ namespace MDA.SpsDepth.Editor {
             public const string ActionObjectToggle = "action.objectToggle";
             public const string ActionScale = "action.scale";
             public const string ActionMaterialSwap = "action.materialSwap";
+            public const string ActionComponentToggle = "action.componentToggle";
+            public const string ActionPoiyomiUvTile = "action.poiyomiUvTile";
+            public const string ActionPoiyomiFlipbookFrame = "action.poiyomiFlipbookFrame";
+            public const string ActionScssShaderInventory = "action.scssShaderInventory";
             public const string SocketMouth = "socket.mouth";
             public const string SocketPussy = "socket.pussy";
             public const string SocketAnal = "socket.anal";
@@ -224,6 +248,14 @@ namespace MDA.SpsDepth.Editor {
                     return T(Key.ActionScale);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
                     return T(Key.ActionMaterialSwap);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle:
+                    return T(Key.ActionComponentToggle);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile:
+                    return T(Key.ActionPoiyomiUvTile);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame:
+                    return T(Key.ActionPoiyomiFlipbookFrame);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory:
+                    return T(Key.ActionScssShaderInventory);
                 default:
                     return actionType.ToString();
             }

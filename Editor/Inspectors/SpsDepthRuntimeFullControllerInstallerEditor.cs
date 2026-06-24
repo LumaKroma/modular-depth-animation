@@ -49,6 +49,23 @@ namespace MDA.SpsDepth.Editor {
             public const string MaterialSwapSlot = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialSwapSlot);
             public const string MaterialSwapFarMaterial = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialSwapFarMaterial);
             public const string MaterialSwapNearMaterial = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.materialSwapNearMaterial);
+            public const string ComponentToggleTarget = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.componentToggleTarget);
+            public const string ComponentToggleFarEnabled = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.componentToggleFarEnabled);
+            public const string ComponentToggleNearEnabled = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.componentToggleNearEnabled);
+            public const string PoiyomiUvTileRenderer = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiUvTileRenderer);
+            public const string PoiyomiUvTileRow = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiUvTileRow);
+            public const string PoiyomiUvTileColumn = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiUvTileColumn);
+            public const string PoiyomiUvTileUseDissolve = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiUvTileUseDissolve);
+            public const string PoiyomiUvTileRenamedMaterial = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiUvTileRenamedMaterial);
+            public const string PoiyomiUvTileFarActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiUvTileFarActive);
+            public const string PoiyomiUvTileNearActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiUvTileNearActive);
+            public const string PoiyomiFlipbookRenderer = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiFlipbookRenderer);
+            public const string PoiyomiFlipbookFarFrame = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiFlipbookFarFrame);
+            public const string PoiyomiFlipbookNearFrame = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.poiyomiFlipbookNearFrame);
+            public const string ScssShaderInventoryRenderer = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scssShaderInventoryRenderer);
+            public const string ScssShaderInventorySlot = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scssShaderInventorySlot);
+            public const string ScssShaderInventoryFarActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scssShaderInventoryFarActive);
+            public const string ScssShaderInventoryNearActive = nameof(SpsDepthRuntimeFullControllerInstaller.DepthAction.scssShaderInventoryNearActive);
         }
 
         private int activeSliderControl;
@@ -265,6 +282,23 @@ namespace MDA.SpsDepth.Editor {
             var materialSwapSlot = action.FindPropertyRelative(PropertyNames.MaterialSwapSlot);
             var materialSwapFarMaterial = action.FindPropertyRelative(PropertyNames.MaterialSwapFarMaterial);
             var materialSwapNearMaterial = action.FindPropertyRelative(PropertyNames.MaterialSwapNearMaterial);
+            var componentToggleTarget = action.FindPropertyRelative(PropertyNames.ComponentToggleTarget);
+            var componentToggleFarEnabled = action.FindPropertyRelative(PropertyNames.ComponentToggleFarEnabled);
+            var componentToggleNearEnabled = action.FindPropertyRelative(PropertyNames.ComponentToggleNearEnabled);
+            var poiyomiUvTileRenderer = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileRenderer);
+            var poiyomiUvTileRow = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileRow);
+            var poiyomiUvTileColumn = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileColumn);
+            var poiyomiUvTileUseDissolve = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileUseDissolve);
+            var poiyomiUvTileRenamedMaterial = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileRenamedMaterial);
+            var poiyomiUvTileFarActive = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileFarActive);
+            var poiyomiUvTileNearActive = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileNearActive);
+            var poiyomiFlipbookRenderer = action.FindPropertyRelative(PropertyNames.PoiyomiFlipbookRenderer);
+            var poiyomiFlipbookFarFrame = action.FindPropertyRelative(PropertyNames.PoiyomiFlipbookFarFrame);
+            var poiyomiFlipbookNearFrame = action.FindPropertyRelative(PropertyNames.PoiyomiFlipbookNearFrame);
+            var scssShaderInventoryRenderer = action.FindPropertyRelative(PropertyNames.ScssShaderInventoryRenderer);
+            var scssShaderInventorySlot = action.FindPropertyRelative(PropertyNames.ScssShaderInventorySlot);
+            var scssShaderInventoryFarActive = action.FindPropertyRelative(PropertyNames.ScssShaderInventoryFarActive);
+            var scssShaderInventoryNearActive = action.FindPropertyRelative(PropertyNames.ScssShaderInventoryNearActive);
 
             var title = $"{index + 1}. {GetActionTitle(action)}";
 
@@ -370,6 +404,55 @@ namespace MDA.SpsDepth.Editor {
                         EditorGUILayout.PropertyField(materialSwapFarMaterial, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarMaterial));
                         EditorGUILayout.PropertyField(materialSwapNearMaterial, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearMaterial));
                         break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.ComponentToggle), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.ComponentToggleHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(componentToggleTarget, SpsDepthLocalization.Content(SpsDepthLocalization.Key.ComponentToggleTarget));
+                        EditorGUILayout.PropertyField(componentToggleFarEnabled, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarEnabled));
+                        EditorGUILayout.PropertyField(componentToggleNearEnabled, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearEnabled));
+                        break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.PoiyomiUvTile), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.PoiyomiUvTileHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(poiyomiUvTileRenderer, SpsDepthLocalization.Content(SpsDepthLocalization.Key.PoiyomiRenderer));
+                        EditorGUILayout.PropertyField(poiyomiUvTileRow, SpsDepthLocalization.Content(SpsDepthLocalization.Key.PoiyomiUvTileRow));
+                        EditorGUILayout.PropertyField(poiyomiUvTileColumn, SpsDepthLocalization.Content(SpsDepthLocalization.Key.PoiyomiUvTileColumn));
+                        EditorGUILayout.PropertyField(poiyomiUvTileFarActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarActive));
+                        EditorGUILayout.PropertyField(poiyomiUvTileNearActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearActive));
+                        EditorGUILayout.PropertyField(poiyomiUvTileUseDissolve, SpsDepthLocalization.Content(SpsDepthLocalization.Key.PoiyomiUvTileUseDissolve));
+                        EditorGUILayout.PropertyField(poiyomiUvTileRenamedMaterial, SpsDepthLocalization.Content(SpsDepthLocalization.Key.PoiyomiUvTileRenamedMaterial));
+                        break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.PoiyomiFlipbookFrame), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.PoiyomiFlipbookFrameHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(poiyomiFlipbookRenderer, SpsDepthLocalization.Content(SpsDepthLocalization.Key.PoiyomiRenderer));
+                        EditorGUILayout.PropertyField(poiyomiFlipbookFarFrame, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarFrame));
+                        EditorGUILayout.PropertyField(poiyomiFlipbookNearFrame, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearFrame));
+                        break;
+                    case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory:
+                        EditorGUILayout.Space();
+                        EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.ScssShaderInventory), EditorStyles.boldLabel);
+                        EditorGUILayout.HelpBox(
+                            SpsDepthLocalization.T(SpsDepthLocalization.Key.ScssShaderInventoryHelp),
+                            MessageType.Info
+                        );
+                        EditorGUILayout.PropertyField(scssShaderInventoryRenderer, SpsDepthLocalization.Content(SpsDepthLocalization.Key.ScssShaderInventoryRenderer));
+                        EditorGUILayout.PropertyField(scssShaderInventorySlot, SpsDepthLocalization.Content(SpsDepthLocalization.Key.ScssShaderInventorySlot));
+                        EditorGUILayout.PropertyField(scssShaderInventoryFarActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.FarActive));
+                        EditorGUILayout.PropertyField(scssShaderInventoryNearActive, SpsDepthLocalization.Content(SpsDepthLocalization.Key.NearActive));
+                        break;
                 }
             }
 
@@ -419,7 +502,11 @@ namespace MDA.SpsDepth.Editor {
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.SetFxFloat),
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ObjectToggle),
                 SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale),
-                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap)
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame),
+                SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory)
             };
             actionType.enumValueIndex = EditorGUILayout.Popup(
                 SpsDepthLocalization.Content(SpsDepthLocalization.Key.ActionType),
@@ -630,6 +717,27 @@ namespace MDA.SpsDepth.Editor {
             action.FindPropertyRelative(PropertyNames.MaterialSwapSlot).intValue = 0;
             action.FindPropertyRelative(PropertyNames.MaterialSwapFarMaterial).objectReferenceValue = null;
             action.FindPropertyRelative(PropertyNames.MaterialSwapNearMaterial).objectReferenceValue = null;
+
+            action.FindPropertyRelative(PropertyNames.ComponentToggleTarget).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.ComponentToggleFarEnabled).boolValue = false;
+            action.FindPropertyRelative(PropertyNames.ComponentToggleNearEnabled).boolValue = true;
+
+            action.FindPropertyRelative(PropertyNames.PoiyomiUvTileRenderer).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.PoiyomiUvTileRow).intValue = 0;
+            action.FindPropertyRelative(PropertyNames.PoiyomiUvTileColumn).intValue = 0;
+            action.FindPropertyRelative(PropertyNames.PoiyomiUvTileUseDissolve).boolValue = false;
+            action.FindPropertyRelative(PropertyNames.PoiyomiUvTileRenamedMaterial).stringValue = string.Empty;
+            action.FindPropertyRelative(PropertyNames.PoiyomiUvTileFarActive).boolValue = false;
+            action.FindPropertyRelative(PropertyNames.PoiyomiUvTileNearActive).boolValue = true;
+
+            action.FindPropertyRelative(PropertyNames.PoiyomiFlipbookRenderer).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.PoiyomiFlipbookFarFrame).intValue = 0;
+            action.FindPropertyRelative(PropertyNames.PoiyomiFlipbookNearFrame).intValue = 1;
+
+            action.FindPropertyRelative(PropertyNames.ScssShaderInventoryRenderer).objectReferenceValue = null;
+            action.FindPropertyRelative(PropertyNames.ScssShaderInventorySlot).intValue = 1;
+            action.FindPropertyRelative(PropertyNames.ScssShaderInventoryFarActive).boolValue = false;
+            action.FindPropertyRelative(PropertyNames.ScssShaderInventoryNearActive).boolValue = true;
         }
 
         private static string GetActionTitle(SerializedProperty action) {
@@ -641,6 +749,10 @@ namespace MDA.SpsDepth.Editor {
             var objectToggleTarget = action.FindPropertyRelative(PropertyNames.ObjectToggleTarget);
             var scaleTarget = action.FindPropertyRelative(PropertyNames.ScaleTarget);
             var materialSwapRenderer = action.FindPropertyRelative(PropertyNames.MaterialSwapRenderer);
+            var componentToggleTarget = action.FindPropertyRelative(PropertyNames.ComponentToggleTarget);
+            var poiyomiUvTileRenderer = action.FindPropertyRelative(PropertyNames.PoiyomiUvTileRenderer);
+            var poiyomiFlipbookRenderer = action.FindPropertyRelative(PropertyNames.PoiyomiFlipbookRenderer);
+            var scssShaderInventoryRenderer = action.FindPropertyRelative(PropertyNames.ScssShaderInventoryRenderer);
             var title = GetActionTypeLabel(actionType.enumValueIndex);
 
             if (
@@ -692,6 +804,34 @@ namespace MDA.SpsDepth.Editor {
                 return $"{title}: {materialSwapRenderer.objectReferenceValue.name}";
             }
 
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle &&
+                componentToggleTarget.objectReferenceValue != null
+            ) {
+                return $"{title}: {componentToggleTarget.objectReferenceValue.GetType().Name}";
+            }
+
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile &&
+                poiyomiUvTileRenderer.objectReferenceValue != null
+            ) {
+                return $"{title}: {poiyomiUvTileRenderer.objectReferenceValue.name}";
+            }
+
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame &&
+                poiyomiFlipbookRenderer.objectReferenceValue != null
+            ) {
+                return $"{title}: {poiyomiFlipbookRenderer.objectReferenceValue.name}";
+            }
+
+            if (
+                actionType.enumValueIndex == (int)SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory &&
+                scssShaderInventoryRenderer.objectReferenceValue != null
+            ) {
+                return $"{title}: {scssShaderInventoryRenderer.objectReferenceValue.name}";
+            }
+
             return title;
         }
 
@@ -711,6 +851,14 @@ namespace MDA.SpsDepth.Editor {
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.Scale);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
                     return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory:
+                    return SpsDepthLocalization.ActionTypeLabel(SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory);
                 default:
                     return enumValueIndex.ToString();
             }

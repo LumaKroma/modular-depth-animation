@@ -21,7 +21,7 @@ Unity 上で `MDA Fury SPS Depth` コンポーネントを追加し、BlendShape
 3. `Target Socket Object` は空のままでも構いません。空の場合はビルド時に自動検出します。
 4. 明示的に指定したい場合は、VRCFury SPS Socket コンポーネントが付いた GameObject を `Target Socket Object` に入れます。
 5. `Depth Action` を追加します。
-6. `BlendShape`、`Animation Clip`、`Material Property`、`Set FX Float`、`Object Toggle`、`Scale`、`Material Swap` のいずれかを設定します。
+6. `BlendShape`、`Animation Clip`、`Material Property`、`Set FX Float`、`Object Toggle`、`Scale`、`Material Swap`、`Component Toggle`、`Poiyomi UV Tile`、`Poiyomi Flipbook Frame`、`SCSS Shader Inventory` のいずれかを設定します。
 7. 通常通りアバターをビルドします。
 
 `Target Socket Object` が空、または Missing の場合は、自動検出に切り替わります。対象ソケットが見つからない場合、その Installer はスキップされ、ビルド全体は失敗しません。
@@ -35,6 +35,10 @@ Unity 上で `MDA Fury SPS Depth` コンポーネントを追加し、BlendShape
 - `Object Toggle`: GameObject の active 状態を Far / Off 側から Near / On 側へ変化させます。
 - `Scale`: GameObject の local scale を Far / Off 側の倍率から Near / On 側の倍率へ変化させます。
 - `Material Swap`: Renderer の Material slot を Far / Off 側の material から Near / On 側の material へ差し替えます。
+- `Component Toggle`: enabled property を持つ Component の状態を Far / Off 側から Near / On 側へ変化させます。
+- `Poiyomi UV Tile`: Poiyomi の UV Tile discard / dissolve property を Far / Off 側から Near / On 側へ変化させます。
+- `Poiyomi Flipbook Frame`: Poiyomi の flipbook frame を Far / Off 側から Near / On 側へ変化させます。
+- `SCSS Shader Inventory`: SCSS Shader Inventory の item slot を Far / Off 側から Near / On 側へ変化させます。
 
 ## Activation Distance
 

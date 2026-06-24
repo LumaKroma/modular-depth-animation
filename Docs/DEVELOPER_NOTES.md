@@ -93,6 +93,9 @@ Depth Action を AnimatorController のレイヤーへ変換する中心です�
 - Set FX Float action の Animator parameter curve 生成
 - Object Toggle action の GameObject active curve 生成
 - Scale action の Transform localScale curve 生成
+- Component Toggle action の Component enabled curve 生成
+- Poiyomi UV Tile / Flipbook Frame action の material property curve 生成
+- SCSS Shader Inventory action の material property curve 生成
 - binding path の収集
 
 Action を増やす場合:
@@ -117,17 +120,18 @@ Set FX Float action を増やす・変更する場合は、VRCFury Full Controll
 - `Scale`
 - `Material Swap`
 - `Material Property` color/vector/ST 対応
+- `Component Toggle`
+- `Poiyomi UV Tile`
+- `Poiyomi Flipbook Frame`
+- `SCSS Shader Inventory`
 
 今後追加する Action の優先度:
 
 | Priority | Action | 理由 / 実装メモ |
 | --- | --- | --- |
-| P2 | `Component Toggle` | VRCFury の `Object Toggle` とは別に、`Behaviour.m_Enabled` を直接動かしたい場面向け。対象 component を安全に serialize する UI が課題。 |
-| P2 | `Poiyomi UV Tile` | 衣装やエフェクト系で使い道がある。Poiyomi 前提なので、Poiyomi 依存を MDA 側に持ち込まない検証方針が必要。 |
-| P2 | `Poiyomi Flipbook Frame` | depth に応じた段階的な見た目変化に向く。連続値ではなく frame index として扱うため、補間の見え方を確認する。 |
-| P3 | `Reset Physbone` | VRCFury にはあるが、depth blend と相性がよいかは要検討。瞬間的な reset 操作なので、Depth Action として自然か確認してから実装する。 |
-| P3 | `Disable Hand Controls` / `Disable Visemes` / `Disable Blinking` | depth に応じた制御としては特殊用途。実装は可能でも UX が分かりにくいため後回し。 |
-| P4 | `Flipbook Builder` / `Smooth Loop Builder` / `SCSS Shader Inventory` | VRCFury の高水準 builder 系。MDA が直接再実装するより、既存 `Animation Clip` や `Material Property` で代替できる場面が多い。 |
+| P3 | `Reset Physbone` | VRCFury の `PhysboneResetService` が生成する一時 parameter に依存する。MDA の Full Controller 単体で再現するには VRCFury service 連携が必要。 |
+| P3 | `Disable Hand Controls` / `Disable Visemes` / `Disable Blinking` | VRCFury の tracking / gesture inhibitor service が生成する parameter に依存する。Depth Action としての UX も特殊なため、直接実装は保留。 |
+| P4 | `Flipbook Builder` / `Smooth Loop Builder` | VRCFury の高水準 builder 系。MDA が直接再実装するより、既存 `Animation Clip` や `Material Property` で代替できる場面が多い。 |
 | P4 | `Enable SPS` / `World Drop` | Depth Action としての意味が薄い、またはビルド時 feature の性格が強い。原則として対象外候補。 |
 
 優先度は固定ではない。実際のユーザー用途で「よく使う SPS Socket Action」が見えてきたら、P2 / P3 は入れ替えてよい。

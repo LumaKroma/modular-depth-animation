@@ -16,7 +16,11 @@ namespace MDA.SpsDepth {
             SetFxFloat,
             ObjectToggle,
             Scale,
-            MaterialSwap
+            MaterialSwap,
+            ComponentToggle,
+            PoiyomiUvTile,
+            PoiyomiFlipbookFrame,
+            ScssShaderInventory
         }
 
         public enum MaterialPropertyValueType {
@@ -108,6 +112,42 @@ namespace MDA.SpsDepth {
             public Material materialSwapFarMaterial;
 
             public Material materialSwapNearMaterial;
+
+            public Component componentToggleTarget;
+
+            public bool componentToggleFarEnabled = false;
+
+            public bool componentToggleNearEnabled = true;
+
+            public Renderer poiyomiUvTileRenderer;
+
+            [Range(0, 3)]
+            public int poiyomiUvTileRow = 0;
+
+            [Range(0, 3)]
+            public int poiyomiUvTileColumn = 0;
+
+            public bool poiyomiUvTileUseDissolve = false;
+
+            public string poiyomiUvTileRenamedMaterial = string.Empty;
+
+            public bool poiyomiUvTileFarActive = false;
+
+            public bool poiyomiUvTileNearActive = true;
+
+            public Renderer poiyomiFlipbookRenderer;
+
+            public int poiyomiFlipbookFarFrame = 0;
+
+            public int poiyomiFlipbookNearFrame = 1;
+
+            public Renderer scssShaderInventoryRenderer;
+
+            public int scssShaderInventorySlot = 1;
+
+            public bool scssShaderInventoryFarActive = false;
+
+            public bool scssShaderInventoryNearActive = true;
         }
 
         public SocketPreset socketPreset = SocketPreset.Mouth;

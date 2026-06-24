@@ -41,6 +41,14 @@ namespace MDA.SpsDepth.Editor {
                     return ValidateScaleAction(avatarRoot, action, out error);
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
                     return ValidateMaterialSwapAction(avatarRoot, action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle:
+                    return ValidateComponentToggleAction(avatarRoot, action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile:
+                    return ValidatePoiyomiUvTileAction(avatarRoot, action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame:
+                    return ValidatePoiyomiFlipbookFrameAction(avatarRoot, action, out error);
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory:
+                    return ValidateScssShaderInventoryAction(avatarRoot, action, out error);
                 default:
                     error = $"Unsupported Depth Action type: {action.actionType}";
                     return false;
@@ -97,6 +105,18 @@ namespace MDA.SpsDepth.Editor {
                 case SpsDepthRuntimeFullControllerInstaller.DepthActionType.MaterialSwap:
                     CreateMaterialSwapAction(context, action, actionName, blendTree);
                     break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle:
+                    CreateComponentToggleAction(context, action, actionName, blendTree);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile:
+                    CreatePoiyomiUvTileAction(context, action, actionName, blendTree);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame:
+                    CreatePoiyomiFlipbookFrameAction(context, action, actionName, blendTree);
+                    break;
+                case SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory:
+                    CreateScssShaderInventoryAction(context, action, actionName, blendTree);
+                    break;
                 default:
                     throw new NotSupportedException($"Unsupported Depth Action type: {action.actionType}");
             }
@@ -150,6 +170,34 @@ namespace MDA.SpsDepth.Editor {
                 action.materialSwapRenderer != null
             ) {
                 return $"Material Swap {actionIndex + 1} - {action.materialSwapRenderer.name}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.ComponentToggle &&
+                action.componentToggleTarget != null
+            ) {
+                return $"Component Toggle {actionIndex + 1} - {action.componentToggleTarget.GetType().Name}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiUvTile &&
+                action.poiyomiUvTileRenderer != null
+            ) {
+                return $"Poiyomi UV Tile {actionIndex + 1} - {action.poiyomiUvTileRenderer.name}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.PoiyomiFlipbookFrame &&
+                action.poiyomiFlipbookRenderer != null
+            ) {
+                return $"Poiyomi Flipbook Frame {actionIndex + 1} - {action.poiyomiFlipbookRenderer.name}";
+            }
+
+            if (
+                action.actionType == SpsDepthRuntimeFullControllerInstaller.DepthActionType.ScssShaderInventory &&
+                action.scssShaderInventoryRenderer != null
+            ) {
+                return $"SCSS Shader Inventory {actionIndex + 1} - {action.scssShaderInventoryRenderer.name}";
             }
 
             return $"{action.actionType} {actionIndex + 1}";
@@ -451,6 +499,134 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
+        private static bool ValidateComponentToggleAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var target = action.componentToggleTarget;
+            if (target == null) {
+                error = "Component Toggle Target is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
+                error =
+                    "Component Toggle Target must be on the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(target.transform)}";
+                return false;
+            }
+
+            if (!HasEnabledProperty(target)) {
+                error =
+                    "Component Toggle Target must have an enabled property that can be animated. " +
+                    $"Assigned component: {target.GetType().Name}";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool HasEnabledProperty(Component component) {
+            if (component == null) {
+                return false;
+            }
+
+            var serializedObject = new SerializedObject(component);
+            return serializedObject.FindProperty("m_Enabled") != null;
+        }
+
+        private static bool ValidatePoiyomiUvTileAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var renderer = action.poiyomiUvTileRenderer;
+            if (renderer == null) {
+                error = "Poiyomi UV Tile Renderer is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
+                error =
+                    "Poiyomi UV Tile Renderer must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            if (
+                action.poiyomiUvTileRow < 0 ||
+                action.poiyomiUvTileRow > 3 ||
+                action.poiyomiUvTileColumn < 0 ||
+                action.poiyomiUvTileColumn > 3
+            ) {
+                error = "Poiyomi UV Tile row and column must be between 0 and 3.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool ValidatePoiyomiFlipbookFrameAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var renderer = action.poiyomiFlipbookRenderer;
+            if (renderer == null) {
+                error = "Poiyomi Flipbook Renderer is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
+                error =
+                    "Poiyomi Flipbook Renderer must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            if (action.poiyomiFlipbookFarFrame < 0 || action.poiyomiFlipbookNearFrame < 0) {
+                error = "Poiyomi Flipbook frame numbers must be 0 or greater.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool ValidateScssShaderInventoryAction(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            out string error
+        ) {
+            error = null;
+
+            var renderer = action.scssShaderInventoryRenderer;
+            if (renderer == null) {
+                error = "SCSS Shader Inventory Renderer is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
+                error =
+                    "SCSS Shader Inventory Renderer must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(renderer.transform)}";
+                return false;
+            }
+
+            if (action.scssShaderInventorySlot < 0 || action.scssShaderInventorySlot > 99) {
+                error = "SCSS Shader Inventory slot must be between 0 and 99.";
+                return false;
+            }
+
+            return true;
+        }
+
         private static void CreateBlendShapeAction(
             SpsDepthActionBuildContext context,
             SpsDepthRuntimeFullControllerInstaller.DepthAction action,
@@ -663,6 +839,142 @@ namespace MDA.SpsDepth.Editor {
             AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
             AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
             AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
+        private static void CreateComponentToggleAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var target = action.componentToggleTarget;
+            var targetPath = AnimationUtility.CalculateTransformPath(target.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(string.IsNullOrEmpty(targetPath) ? "<avatar root>" : targetPath);
+
+            var nearClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Near",
+                targetPath,
+                target.GetType(),
+                "m_Enabled",
+                action.componentToggleNearEnabled ? 1f : 0f
+            );
+            var farClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Far",
+                targetPath,
+                target.GetType(),
+                "m_Enabled",
+                action.componentToggleFarEnabled ? 1f : 0f
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
+        private static void CreatePoiyomiUvTileAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var renderer = action.poiyomiUvTileRenderer;
+            var rendererPath = AnimationUtility.CalculateTransformPath(renderer.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(rendererPath);
+
+            var propertyName = GetPoiyomiUvTilePropertyName(action);
+            var nearClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Near",
+                rendererPath,
+                typeof(Renderer),
+                propertyName,
+                action.poiyomiUvTileNearActive ? 0f : 1f
+            );
+            var farClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Far",
+                rendererPath,
+                typeof(Renderer),
+                propertyName,
+                action.poiyomiUvTileFarActive ? 0f : 1f
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
+        private static void CreatePoiyomiFlipbookFrameAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var renderer = action.poiyomiFlipbookRenderer;
+            var rendererPath = AnimationUtility.CalculateTransformPath(renderer.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(rendererPath);
+
+            var nearClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Near",
+                rendererPath,
+                typeof(Renderer),
+                "material._FlipbookCurrentFrame",
+                GetPoiyomiFlipbookAnimatedFrame(action.poiyomiFlipbookNearFrame)
+            );
+            var farClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Far",
+                rendererPath,
+                typeof(Renderer),
+                "material._FlipbookCurrentFrame",
+                GetPoiyomiFlipbookAnimatedFrame(action.poiyomiFlipbookFarFrame)
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
+        private static void CreateScssShaderInventoryAction(
+            SpsDepthActionBuildContext context,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            string actionName,
+            BlendTree blendTree
+        ) {
+            var renderer = action.scssShaderInventoryRenderer;
+            var rendererPath = AnimationUtility.CalculateTransformPath(renderer.transform, context.AvatarRoot.transform);
+            context.BindingPaths.Add(rendererPath);
+
+            var propertyName = $"material._InventoryItem{action.scssShaderInventorySlot:D2}Animated";
+            var nearClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Near",
+                rendererPath,
+                typeof(Renderer),
+                propertyName,
+                action.scssShaderInventoryNearActive ? 1f : 0f
+            );
+            var farClip = CreateFloatCurveClip(
+                $"SPS Depth {actionName} Far",
+                rendererPath,
+                typeof(Renderer),
+                propertyName,
+                action.scssShaderInventoryFarActive ? 1f : 0f
+            );
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
+        }
+
+        private static string GetPoiyomiUvTilePropertyName(
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action
+        ) {
+            var prefix = action.poiyomiUvTileUseDissolve
+                ? "_UVTileDissolveAlpha_Row"
+                : "_UDIMDiscardRow";
+            var propertyName = $"{prefix}{action.poiyomiUvTileRow}_{action.poiyomiUvTileColumn}";
+            if (!string.IsNullOrWhiteSpace(action.poiyomiUvTileRenamedMaterial)) {
+                propertyName += "_" + action.poiyomiUvTileRenamedMaterial.Trim();
+            }
+
+            return "material." + propertyName;
+        }
+
+        private static float GetPoiyomiFlipbookAnimatedFrame(int frame) {
+            return Mathf.Floor(Mathf.Max(0, frame)) + 0.5f;
         }
 
         private static void AddDepthChildren(
