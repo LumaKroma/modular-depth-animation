@@ -203,6 +203,61 @@ namespace MDA.SpsDepth.Editor {
             return $"{action.actionType} {actionIndex + 1}";
         }
 
+        private static bool ValidateRendererUnderAvatar(
+            GameObject avatarRoot,
+            Renderer renderer,
+            string label,
+            out string error
+        ) {
+            return ValidateComponentUnderAvatar(avatarRoot, renderer, label, out error);
+        }
+
+        private static bool ValidateGameObjectUnderAvatar(
+            GameObject avatarRoot,
+            GameObject target,
+            string label,
+            out string error
+        ) {
+            error = null;
+
+            if (target == null) {
+                error = $"{label} is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
+                error =
+                    $"{label} must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(target.transform)}";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool ValidateComponentUnderAvatar(
+            GameObject avatarRoot,
+            Component target,
+            string label,
+            out string error
+        ) {
+            error = null;
+
+            if (target == null) {
+                error = $"{label} is not assigned.";
+                return false;
+            }
+
+            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
+                error =
+                    $"{label} must be the avatar root or one of its children. " +
+                    $"Assigned object: {GetPath(target.transform)}";
+                return false;
+            }
+
+            return true;
+        }
+
         private static bool ValidateBlendShapeAction(
             GameObject avatarRoot,
             SpsDepthRuntimeFullControllerInstaller.DepthAction action,
@@ -211,15 +266,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var renderer = action.blendShapeRenderer;
-            if (renderer == null) {
-                error = "BlendShape Renderer is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
-                error =
-                    "BlendShape Renderer must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(renderer.transform)}";
+            if (!ValidateRendererUnderAvatar(avatarRoot, renderer, "BlendShape Renderer", out error)) {
                 return false;
             }
 
@@ -276,15 +323,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var renderer = action.materialRenderer;
-            if (renderer == null) {
-                error = "Material Renderer is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
-                error =
-                    "Material Renderer must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(renderer.transform)}";
+            if (!ValidateRendererUnderAvatar(avatarRoot, renderer, "Material Renderer", out error)) {
                 return false;
             }
 
@@ -415,15 +454,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var target = action.objectToggleTarget;
-            if (target == null) {
-                error = "Object Toggle Target is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
-                error =
-                    "Object Toggle Target must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(target.transform)}";
+            if (!ValidateGameObjectUnderAvatar(avatarRoot, target, "Object Toggle Target", out error)) {
                 return false;
             }
 
@@ -438,15 +469,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var target = action.scaleTarget;
-            if (target == null) {
-                error = "Scale Target is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
-                error =
-                    "Scale Target must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(target.transform)}";
+            if (!ValidateGameObjectUnderAvatar(avatarRoot, target, "Scale Target", out error)) {
                 return false;
             }
 
@@ -461,15 +484,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var renderer = action.materialSwapRenderer;
-            if (renderer == null) {
-                error = "Material Swap Renderer is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
-                error =
-                    "Material Swap Renderer must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(renderer.transform)}";
+            if (!ValidateRendererUnderAvatar(avatarRoot, renderer, "Material Swap Renderer", out error)) {
                 return false;
             }
 
@@ -507,15 +522,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var target = action.componentToggleTarget;
-            if (target == null) {
-                error = "Component Toggle Target is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(target.transform, avatarRoot.transform)) {
-                error =
-                    "Component Toggle Target must be on the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(target.transform)}";
+            if (!ValidateComponentUnderAvatar(avatarRoot, target, "Component Toggle Target", out error)) {
                 return false;
             }
 
@@ -546,15 +553,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var renderer = action.poiyomiUvTileRenderer;
-            if (renderer == null) {
-                error = "Poiyomi UV Tile Renderer is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
-                error =
-                    "Poiyomi UV Tile Renderer must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(renderer.transform)}";
+            if (!ValidateRendererUnderAvatar(avatarRoot, renderer, "Poiyomi UV Tile Renderer", out error)) {
                 return false;
             }
 
@@ -579,15 +578,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var renderer = action.poiyomiFlipbookRenderer;
-            if (renderer == null) {
-                error = "Poiyomi Flipbook Renderer is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
-                error =
-                    "Poiyomi Flipbook Renderer must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(renderer.transform)}";
+            if (!ValidateRendererUnderAvatar(avatarRoot, renderer, "Poiyomi Flipbook Renderer", out error)) {
                 return false;
             }
 
@@ -607,15 +598,7 @@ namespace MDA.SpsDepth.Editor {
             error = null;
 
             var renderer = action.scssShaderInventoryRenderer;
-            if (renderer == null) {
-                error = "SCSS Shader Inventory Renderer is not assigned.";
-                return false;
-            }
-
-            if (!IsSameOrChildOf(renderer.transform, avatarRoot.transform)) {
-                error =
-                    "SCSS Shader Inventory Renderer must be the avatar root or one of its children. " +
-                    $"Assigned object: {GetPath(renderer.transform)}";
+            if (!ValidateRendererUnderAvatar(avatarRoot, renderer, "SCSS Shader Inventory Renderer", out error)) {
                 return false;
             }
 
@@ -655,9 +638,7 @@ namespace MDA.SpsDepth.Editor {
                 blendShapeName,
                 action.farWeight
             );
-            AssetDatabase.AddObjectToAsset(nearBlendShapeClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farBlendShapeClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearBlendShapeClip, farBlendShapeClip);
+            AddNearFarClips(context, blendTree, action, nearBlendShapeClip, farBlendShapeClip);
         }
 
         private static void CreateAnimationClipAction(
@@ -719,9 +700,7 @@ namespace MDA.SpsDepth.Editor {
                 action.materialFarTextureScale,
                 action.materialFarTextureOffset
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreateSetFxFloatAction(
@@ -748,9 +727,7 @@ namespace MDA.SpsDepth.Editor {
                 action.fxFloatParameterName,
                 action.fxFloatFarValue
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreateObjectToggleAction(
@@ -777,9 +754,7 @@ namespace MDA.SpsDepth.Editor {
                 "m_IsActive",
                 action.objectToggleFarActive ? 1f : 0f
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreateScaleAction(
@@ -803,9 +778,7 @@ namespace MDA.SpsDepth.Editor {
                 targetPath,
                 localScale * action.scaleFarMultiplier
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreateMaterialSwapAction(
@@ -836,9 +809,7 @@ namespace MDA.SpsDepth.Editor {
                 propertyName,
                 farMaterial
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreateComponentToggleAction(
@@ -865,9 +836,7 @@ namespace MDA.SpsDepth.Editor {
                 "m_Enabled",
                 action.componentToggleFarEnabled ? 1f : 0f
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreatePoiyomiUvTileAction(
@@ -895,9 +864,7 @@ namespace MDA.SpsDepth.Editor {
                 propertyName,
                 action.poiyomiUvTileFarActive ? 0f : 1f
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreatePoiyomiFlipbookFrameAction(
@@ -924,9 +891,7 @@ namespace MDA.SpsDepth.Editor {
                 "material._FlipbookCurrentFrame",
                 GetPoiyomiFlipbookAnimatedFrame(action.poiyomiFlipbookFarFrame)
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static void CreateScssShaderInventoryAction(
@@ -954,9 +919,7 @@ namespace MDA.SpsDepth.Editor {
                 propertyName,
                 action.scssShaderInventoryFarActive ? 1f : 0f
             );
-            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
-            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
-            AddDepthChildren(blendTree, action, nearClip, farClip);
+            AddNearFarClips(context, blendTree, action, nearClip, farClip);
         }
 
         private static string GetPoiyomiUvTilePropertyName(
@@ -975,6 +938,18 @@ namespace MDA.SpsDepth.Editor {
 
         private static float GetPoiyomiFlipbookAnimatedFrame(int frame) {
             return Mathf.Floor(Mathf.Max(0, frame)) + 0.5f;
+        }
+
+        private static void AddNearFarClips(
+            SpsDepthActionBuildContext context,
+            BlendTree blendTree,
+            SpsDepthRuntimeFullControllerInstaller.DepthAction action,
+            AnimationClip nearClip,
+            AnimationClip farClip
+        ) {
+            AssetDatabase.AddObjectToAsset(nearClip, context.AnimatorController);
+            AssetDatabase.AddObjectToAsset(farClip, context.AnimatorController);
+            AddDepthChildren(blendTree, action, nearClip, farClip);
         }
 
         private static void AddDepthChildren(
