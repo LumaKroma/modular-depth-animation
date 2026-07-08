@@ -9,7 +9,7 @@
     { "key": "targetSocket", "value": "ターゲットソケット" },
     { "key": "targetSocket.help", "value": "Target Socket Object が入っている場合は、そのオブジェクトをそのまま使用します。空、または Missing の場合は、選択した種類のソケットをビルド時に自動検出します。" },
     { "key": "targetSocketObject.invalid.title", "value": "Target Socket が無効です" },
-    { "key": "targetSocketObject.invalid.message", "value": "Target Socket Object には VRCFury SPS Socket コンポーネントが必要です。\n\n{0}" },
+    { "key": "targetSocketObject.invalid.message", "value": "Target Socket Object には VRCFury または SPS for NDMF の Socket コンポーネントが必要です。\n\n{0}" },
     { "key": "targetSocketObject.missing", "value": "Target Socket Object の参照が Missing です。" },
     { "key": "autoDetectType", "value": "自動検出するソケット" },
     { "key": "autoDetectSocket", "value": "自動検出" },
@@ -125,13 +125,13 @@
     { "key": "resolve.autoInspectDetected", "value": "{0} SPS Socket を検出しました: {1}" },
     { "key": "resolve.autoInspectMissing", "value": "{1} の下に {0} SPS Socket が見つかりませんでした。詳細: {2}" },
     { "key": "resolve.explicitOutsideAvatar", "value": "Target Socket Object は Avatar root か、その子オブジェクトである必要があります。指定オブジェクト: {0}" },
-    { "key": "resolve.explicitMissingSocket", "value": "Target Socket Object に VRCFury SPS Socket コンポーネントがありません。{0} 指定オブジェクト: {1}" },
+    { "key": "resolve.explicitMissingSocket", "value": "Target Socket Object に VRCFury または SPS for NDMF の Socket コンポーネントがありません。{0} 指定オブジェクト: {1}" },
     { "key": "resolve.explicitUsing", "value": "指定された Socket を使用します: {0}" },
     { "key": "resolve.foundKnownPath", "value": "既知のパスから検出しました: {0}" },
     { "key": "resolve.foundObjectName", "value": "オブジェクト名から検出しました: {0}" },
     { "key": "resolve.noMatchingSocket", "value": "{0} socket が見つかりませんでした。" },
     { "key": "resolve.targetObjectNull", "value": "Target object が null です。" },
     { "key": "resolve.expectedComponentType", "value": "期待されるコンポーネント型: {0}。" },
-    { "key": "resolve.vrcfurySocketTypeMissing", "value": "VRCFury SPS Socket の型が見つかりません。VRCFury がインストールされ、コンパイルされているか確認してください。" }
+    { "key": "resolve.vrcfurySocketTypeMissing", "value": "対応している SPS Socket の型が見つかりません。VRCFury または SPS for NDMF がインストールされ、コンパイルされているか確認してください。" }
   ]
 }

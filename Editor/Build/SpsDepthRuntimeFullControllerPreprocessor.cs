@@ -11,7 +11,7 @@ using MDA.SpsDepth;
 
 namespace MDA.SpsDepth.Editor {
     public sealed class SpsDepthRuntimeFullControllerPreprocessor : IVRCSDKPreprocessAvatarCallback {
-        // Run immediately before VRCFury's own preprocessor.
+        // Run immediately before VRCFury/SPSNDMF preprocessors.
         public int callbackOrder => -10001;
 
         public bool OnPreprocessAvatar(GameObject avatarGameObject) {
@@ -94,7 +94,7 @@ namespace MDA.SpsDepth.Editor {
                     out var createError
                 )) {
                     Debug.LogError(
-                        $"{LogPrefix(installer)} Failed to create VRCFury Full Controller.\n{createError}",
+                        $"{LogPrefix(installer)} Failed to create SPS depth Full Controller.\n{createError}",
                         installer
                     );
                     UnityEngine.Object.DestroyImmediate(generated);
@@ -105,7 +105,7 @@ namespace MDA.SpsDepth.Editor {
                 EditorUtility.SetDirty(socketObject);
 
                 Debug.Log(
-                    $"{LogPrefix(installer)} Generated VRCFury Full Controller under socket: {SpsDepthSocketResolver.GetPath(socketObject.transform)}\n" +
+                    $"{LogPrefix(installer)} Generated SPS depth Full Controller under socket: {SpsDepthSocketResolver.GetPath(socketObject.transform)}\n" +
                     $"Socket resolve: {socketMessage}\n" +
                     $"Injected depth param: {injectedDepthParam}\n" +
                     $"Generated controller: {controllerResult.AssetPath}\n" +

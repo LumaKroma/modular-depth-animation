@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using MDA.SpsDepth;
@@ -31,16 +32,21 @@ namespace MDA.SpsDepth.Editor {
             }
         }
 
+        private static readonly string[] SocketTypeNames = {
+            "VF.Component.VRCFuryHapticSocket",
+            "SpsNdmf.Component.VRCFuryHapticSocket"
+        };
+
         private static readonly SocketPresetDefinition[] PresetDefinitions = {
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Mouth, "Mouth", "Blow"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Pussy, "Pussy", "Vagina", "Front"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Anal, "Anal", "Anus", "Butt", "Ass", "Back"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.LeftHand, "Left Hand", "LeftHand", "L Hand", "LHand"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.RightHand, "Right Hand", "RightHand", "R Hand", "RHand"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.BothHand, "Both Hand", "BothHand", "Both Hands", "BothHands", "Hands", "Hand"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Boobs, "Boobs", "Boob", "Breast", "Breasts", "Chest", "Nipple", "Tit"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Thigh, "Thigh", "Thighs", "Leg", "Legs"),
-            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Foot, "Foot", "Feet", "Left Foot", "LeftFoot", "Right Foot", "RightFoot", "L Foot", "LFoot", "R Foot", "RFoot"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Mouth, "Mouth", "Blow", "Blowjob", "Oral", "Head"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Pussy, "Pussy", "Vagina", "Vag", "Front", "Hips Front", "HipsFront", "HipsFrontSocket", "Cooch", "Coochy"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Anal, "Anal", "Anus", "Butt", "Ass", "Back", "Hips Back", "HipsBack", "HipsBackSocket", "Assjob"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.LeftHand, "Left Hand", "LeftHand", "L Hand", "LHand", "Handjob Left", "Left Handjob", "Hand Left", "HandLeft"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.RightHand, "Right Hand", "RightHand", "R Hand", "RHand", "Handjob Right", "Right Handjob", "Hand Right", "HandRight"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.BothHand, "Double Handjob", "DoubleHandjob", "Both Hand", "BothHand", "Both Hands", "BothHands", "Hands", "Handjob", "Hand"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Boobs, "Boobs", "Boob", "Breast", "Breasts", "Chest", "Nipple", "Tit", "Titjob"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Thigh, "Thigh", "Thighs", "Leg", "Legs", "Thighjob"),
+            new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Foot, "Foot", "Feet", "Left Foot", "LeftFoot", "Right Foot", "RightFoot", "L Foot", "LFoot", "R Foot", "RFoot", "Footjob", "Steppies", "Sole", "Soles", "Foot Left", "FootLeft", "Foot Right", "FootRight"),
             new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Other, "Other", "Custom", "Socket")
         };
 
@@ -199,13 +205,13 @@ namespace MDA.SpsDepth.Editor {
             socketObject = null;
             message = null;
 
-            if (!TryGetVrcfurySocketType(out var socketType, out var socketTypeError)) {
+            if (!TryGetSocketTypes(out var socketTypes, out var socketTypeError)) {
                 message = socketTypeError;
                 return false;
             }
 
             var definition = GetDefinition(preset);
-            socketObject = FindByKnownPath(avatarRoot.transform, socketType, definition);
+            socketObject = FindByKnownPath(avatarRoot.transform, socketTypes, definition);
             if (socketObject != null) {
                 message = SpsDepthLocalization.Format(
                     SpsDepthLocalization.Key.ResolveFoundKnownPath,
@@ -214,7 +220,7 @@ namespace MDA.SpsDepth.Editor {
                 return true;
             }
 
-            socketObject = FindByObjectName(avatarRoot, socketType, definition);
+            socketObject = FindByObjectName(avatarRoot, socketTypes, definition);
             if (socketObject != null) {
                 message = SpsDepthLocalization.Format(
                     SpsDepthLocalization.Key.ResolveFoundObjectName,
@@ -232,12 +238,12 @@ namespace MDA.SpsDepth.Editor {
 
         private static GameObject FindByKnownPath(
             Transform avatarRoot,
-            Type socketType,
+            Type[] socketTypes,
             SocketPresetDefinition definition
         ) {
             foreach (var path in GetKnownRelativePaths(definition)) {
                 var transform = avatarRoot.Find(path);
-                if (transform != null && transform.gameObject.GetComponent(socketType) != null) {
+                if (transform != null && HasSocketComponent(transform.gameObject, socketTypes)) {
                     return transform.gameObject;
                 }
             }
@@ -247,21 +253,25 @@ namespace MDA.SpsDepth.Editor {
 
         private static GameObject FindByObjectName(
             GameObject avatarRoot,
-            Type socketType,
+            Type[] socketTypes,
             SocketPresetDefinition definition
         ) {
+            var bestScore = 0;
+            GameObject bestSocket = null;
             var sockets = avatarRoot
                 .GetComponentsInChildren<Component>(true)
-                .Where(c => c != null && socketType.IsInstanceOfType(c))
-                .Select(c => c.gameObject);
+                .Where(c => c != null && socketTypes.Any(t => t.IsInstanceOfType(c)))
+                .ToArray();
 
-            foreach (var socket in sockets) {
-                if (definition.Aliases.Any(alias => ContainsIgnoreCase(socket.name, alias))) {
-                    return socket;
+            foreach (var socketComponent in sockets) {
+                var score = GetSocketMatchScore(socketComponent, definition);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestSocket = socketComponent.gameObject;
                 }
             }
 
-            return null;
+            return bestSocket;
         }
 
         private static IEnumerable<string> GetKnownRelativePaths(SocketPresetDefinition definition) {
@@ -269,6 +279,15 @@ namespace MDA.SpsDepth.Editor {
                 "Penetration Contact System/Target Objects",
                 "PCS/Target Objects",
                 "SPS/Target Objects"
+            };
+            var spsRoots = new[] {
+                "SPS",
+                "SPS/Handjob",
+                "SPS/Special",
+                "SPS/Feet",
+                "Handjob",
+                "Special",
+                "Feet"
             };
 
             foreach (var alias in definition.Aliases) {
@@ -279,6 +298,13 @@ namespace MDA.SpsDepth.Editor {
                     yield return $"{targetRoot}/{alias}/{alias} Socket";
                     yield return $"{targetRoot}/{alias}/{alias}";
                     yield return $"{targetRoot}/{alias} Socket";
+                }
+
+                foreach (var spsRoot in spsRoots) {
+                    yield return $"{spsRoot}/{alias}/{alias} Socket";
+                    yield return $"{spsRoot}/{alias}/{alias}";
+                    yield return $"{spsRoot}/{alias} Socket";
+                    yield return $"{spsRoot}/{alias}";
                 }
 
                 yield return $"{alias}/{alias} Socket";
@@ -296,14 +322,14 @@ namespace MDA.SpsDepth.Editor {
                 return false;
             }
 
-            if (!TryGetVrcfurySocketType(out var socketType, out error)) {
+            if (!TryGetSocketTypes(out var socketTypes, out error)) {
                 return false;
             }
 
-            if (targetObject.GetComponent(socketType) == null) {
+            if (!HasSocketComponent(targetObject, socketTypes)) {
                 error = SpsDepthLocalization.Format(
                     SpsDepthLocalization.Key.ResolveExpectedComponentType,
-                    socketType.FullName
+                    string.Join(" / ", socketTypes.Select(t => t.FullName))
                 );
                 return false;
             }
@@ -311,16 +337,26 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
-        private static bool TryGetVrcfurySocketType(out Type socketType, out string error) {
-            socketType = FindType("VF.Component.VRCFuryHapticSocket");
+        private static bool TryGetSocketTypes(out Type[] socketTypes, out string error) {
+            socketTypes = SocketTypeNames
+                .Select(FindType)
+                .Where(t => t != null)
+                .Distinct()
+                .ToArray();
             error = null;
 
-            if (socketType == null) {
+            if (socketTypes.Length == 0) {
                 error = SpsDepthLocalization.T(SpsDepthLocalization.Key.ResolveVrcfurySocketTypeMissing);
                 return false;
             }
 
             return true;
+        }
+
+        private static bool HasSocketComponent(GameObject targetObject, Type[] socketTypes) {
+            return targetObject != null &&
+                socketTypes != null &&
+                socketTypes.Any(t => t != null && targetObject.GetComponent(t) != null);
         }
 
         private static Type FindType(string fullName) {
@@ -369,6 +405,84 @@ namespace MDA.SpsDepth.Editor {
             return SpsDepthLocalization.SocketPresetLabel(preset);
         }
 
+        private static int GetSocketMatchScore(Component socketComponent, SocketPresetDefinition definition) {
+            if (socketComponent == null || definition == null) {
+                return 0;
+            }
+
+            var aliases = definition.Aliases ?? Array.Empty<string>();
+            var score = 0;
+            score = Math.Max(score, GetTextMatchScore(socketComponent.gameObject.name, aliases, 100));
+            score = Math.Max(score, GetTextMatchScore(GetStringField(socketComponent, "name"), aliases, 120));
+            score = Math.Max(score, GetTextMatchScore(GetStringField(socketComponent, "oscId"), aliases, 80));
+
+            foreach (var tag in GetStringListField(socketComponent, "tags")) {
+                score = Math.Max(score, GetTextMatchScore(tag, aliases, 160));
+            }
+
+            return score;
+        }
+
+        private static int GetTextMatchScore(string value, IEnumerable<string> aliases, int baseScore) {
+            if (string.IsNullOrWhiteSpace(value) || aliases == null) {
+                return 0;
+            }
+
+            var normalizedValue = NormalizeSearchText(value);
+            if (string.IsNullOrEmpty(normalizedValue)) {
+                return 0;
+            }
+
+            var best = 0;
+            foreach (var alias in aliases) {
+                var normalizedAlias = NormalizeSearchText(alias);
+                if (string.IsNullOrEmpty(normalizedAlias)) {
+                    continue;
+                }
+
+                if (normalizedValue == normalizedAlias) {
+                    best = Math.Max(best, baseScore + 1000 + normalizedAlias.Length);
+                } else if (normalizedValue.Contains(normalizedAlias)) {
+                    best = Math.Max(best, baseScore + normalizedAlias.Length);
+                }
+            }
+
+            return best;
+        }
+
+        private static string GetStringField(object target, string fieldName) {
+            if (target == null || string.IsNullOrWhiteSpace(fieldName)) {
+                return null;
+            }
+
+            var field = target.GetType().GetField(
+                fieldName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+            );
+            return field?.GetValue(target) as string;
+        }
+
+        private static IEnumerable<string> GetStringListField(object target, string fieldName) {
+            if (target == null || string.IsNullOrWhiteSpace(fieldName)) {
+                yield break;
+            }
+
+            var field = target.GetType().GetField(
+                fieldName,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+            );
+            var values = field?.GetValue(target) as IEnumerable<string>;
+            if (values == null) {
+                yield break;
+            }
+
+            foreach (var value in values) {
+                if (!string.IsNullOrWhiteSpace(value)) {
+                    yield return value;
+                }
+            }
+        }
+
         private static bool IsSameOrChildOf(Transform candidate, Transform root) {
             if (candidate == null || root == null) {
                 return false;
@@ -386,12 +500,15 @@ namespace MDA.SpsDepth.Editor {
             return false;
         }
 
-        private static bool ContainsIgnoreCase(string value, string fragment) {
-            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(fragment)) {
-                return false;
+        private static string NormalizeSearchText(string value) {
+            if (string.IsNullOrWhiteSpace(value)) {
+                return string.Empty;
             }
 
-            return value.IndexOf(fragment, StringComparison.OrdinalIgnoreCase) >= 0;
+            return new string(value
+                .Where(char.IsLetterOrDigit)
+                .Select(char.ToLowerInvariant)
+                .ToArray());
         }
     }
 }

@@ -1,8 +1,8 @@
 # Modular Depth Animation for SPS
 
-VRCFury の SPS Socket に、距離に応じたアニメーションを追加するための小さな Unity Editor 拡張です。
+VRCFury / SPS for NDMF の SPS Socket に、距離に応じたアニメーションを追加するための小さな Unity Editor 拡張です。
 
-`MDA Fury SPS Depth` コンポーネントで Action を設定すると、ビルド時に対象 SPS Socket の下へ VRCFury Full Controller を自動生成します。
+`MDA Fury SPS Depth` コンポーネントで Action を設定すると、ビルド時に対象 SPS Socket の下へ Full Controller を自動生成します。
 
 ## できること
 
@@ -22,8 +22,8 @@ SPS の挿入深度に合わせて、次のような値を変化させられま�
 
 - Unity 2022.3
 - VRChat Avatar SDK
-- VRCFury
-- VRCFury SPS Socket が設定済みのアバター
+- VRCFury または SPS for NDMF
+- SPS Socket が設定済みのアバター
 
 ## 導入
 
@@ -72,15 +72,15 @@ Action は `Copy` / `コピー` ボタンで複製できます。似た設定を
 
 ## 生成されるもの
 
-ビルド時に、対象 SPS Socket の下へ生成用 GameObject を作り、その下に VRCFury Full Controller を設定します。
+ビルド時に、対象 SPS Socket の下へ生成用 GameObject を作り、その下に Full Controller を設定します。
 
 生成される AnimatorController アセットは `Assets/MDAGenerated` に作られます。
 
 ## 注意
 
-- このツールは VRCFury 公式の機能ではありません。
-- VRCFury 側の仕様変更により動かなくなる可能性があります。
-- VRCFury SPS Socket 標準の Depth Animation と完全に同じ機能ではありません。
+- このツールは VRCFury / SPS for NDMF 公式の機能ではありません。
+- VRCFury / SPS for NDMF 側の仕様変更により動かなくなる可能性があります。
+- SPS Socket 標準の Depth Animation と完全に同じ機能ではありません。
 
 ## License
 

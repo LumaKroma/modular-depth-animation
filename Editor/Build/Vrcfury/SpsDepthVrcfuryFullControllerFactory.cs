@@ -12,6 +12,40 @@ using UnityEngine;
 
 namespace MDA.SpsDepth.Editor {
     internal static class SpsDepthVrcfuryFullControllerFactory {
+        private sealed class FullControllerProvider {
+            public readonly string DisplayName;
+            public readonly string VrcfuryTypeName;
+            public readonly string FullControllerTypeName;
+            public readonly string SocketTypeName;
+
+            public FullControllerProvider(
+                string displayName,
+                string vrcfuryTypeName,
+                string fullControllerTypeName,
+                string socketTypeName
+            ) {
+                DisplayName = displayName;
+                VrcfuryTypeName = vrcfuryTypeName;
+                FullControllerTypeName = fullControllerTypeName;
+                SocketTypeName = socketTypeName;
+            }
+        }
+
+        private static readonly FullControllerProvider[] Providers = {
+            new FullControllerProvider(
+                "VRCFury",
+                "VF.Model.VRCFury",
+                "VF.Model.Feature.FullController",
+                "VF.Component.VRCFuryHapticSocket"
+            ),
+            new FullControllerProvider(
+                "SPS for NDMF",
+                "SpsNdmf.Model.VRCFury",
+                "SpsNdmf.Model.Feature.FullController",
+                "SpsNdmf.Component.VRCFuryHapticSocket"
+            )
+        };
+
         public static bool TryCreate(
             GameObject targetObject,
             GameObject avatarRoot,
@@ -32,15 +66,20 @@ namespace MDA.SpsDepth.Editor {
                 return false;
             }
 
-            var vrcfuryType = FindType("VF.Model.VRCFury");
-            if (vrcfuryType == null) {
-                error = "Could not find VRCFury component type.";
+            if (!TryResolveProvider(targetObject, out var provider, out var providerError)) {
+                error = providerError;
                 return false;
             }
 
-            var fullControllerType = FindType("VF.Model.Feature.FullController");
+            var vrcfuryType = FindType(provider.VrcfuryTypeName);
+            if (vrcfuryType == null) {
+                error = $"Could not find {provider.DisplayName} component type: {provider.VrcfuryTypeName}.";
+                return false;
+            }
+
+            var fullControllerType = FindType(provider.FullControllerTypeName);
             if (fullControllerType == null) {
-                error = "Could not find VRCFury FullController feature type.";
+                error = $"Could not find {provider.DisplayName} FullController feature type: {provider.FullControllerTypeName}.";
                 return false;
             }
 
@@ -79,6 +118,49 @@ namespace MDA.SpsDepth.Editor {
             EditorUtility.SetDirty(vrcfuryComponent);
             TryMarkVrcfuryDirty(vrcfuryComponent);
             return true;
+        }
+
+        private static bool TryResolveProvider(
+            GameObject targetObject,
+            out FullControllerProvider provider,
+            out string error
+        ) {
+            provider = null;
+            error = null;
+
+            provider = FindProviderFromSocketAncestor(targetObject);
+            if (provider != null) {
+                return true;
+            }
+
+            provider = Providers.FirstOrDefault(p =>
+                FindType(p.VrcfuryTypeName) != null &&
+                FindType(p.FullControllerTypeName) != null
+            );
+            if (provider != null) {
+                return true;
+            }
+
+            error =
+                "Could not find a supported Full Controller provider. " +
+                "Install VRCFury or SPS for NDMF and wait for Unity compilation to finish.";
+            return false;
+        }
+
+        private static FullControllerProvider FindProviderFromSocketAncestor(GameObject targetObject) {
+            var current = targetObject != null ? targetObject.transform : null;
+            while (current != null) {
+                foreach (var provider in Providers) {
+                    var socketType = FindType(provider.SocketTypeName);
+                    if (socketType != null && current.gameObject.GetComponent(socketType) != null) {
+                        return provider;
+                    }
+                }
+
+                current = current.parent;
+            }
+
+            return null;
         }
 
         private static void SetGlobalParameters(object fullController, IEnumerable<string> globalParameters) {
