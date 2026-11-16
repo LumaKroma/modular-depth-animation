@@ -1,0 +1,30 @@
+{
+  "name": "LumaKroma Modular Depth Animation",
+  "id": "com.lumakroma.mda-listing",
+  "url": "https://lumakroma.github.io/modular-depth-animation/index.json",
+  "author": "LumaKroma",
+  "packages": {
+    "com.lumakroma.modular-depth-animation-sps": {
+      "versions": {
+        "0.1.0-beta.3.rc.1": {
+          "name": "com.lumakroma.modular-depth-animation-sps",
+          "version": "0.1.0-beta.3.rc.1",
+          "displayName": "Modular Depth Animation for SPS",
+          "description": "Release candidate targeting VRCFury 1.1470.0 and VRChat Avatars SDK 3.10.6. Full VRCFury build tools required. Older versions unverified.",
+          "unity": "2022.3",
+          "author": {
+            "name": "LumaKroma"
+          },
+          "license": "MIT",
+          "vpmDependencies": {
+            "com.vrcfury.vrcfury": "1.1470.0",
+            "com.vrchat.avatars": "3.10.6",
+            "com.vrchat.base": "3.10.6"
+          },
+          "url": "https://github.com/LumaKroma/modular-depth-animation/releases/download/v0.1.0-beta.3.rc.1/ModularDepthAnimationForSPS-0.1.0-beta.3.rc.1-vpm.zip",
+          "zipSHA256": "463a768daa455b1a867f3fdf0ae2ee162e1406c8156cc7a0e61ab95ffe36161b"
+        }
+      }
+    }
+  }
+}

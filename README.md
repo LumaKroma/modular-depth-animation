@@ -1,3 +1,9 @@
+## VPM installation
+
+[VCC / ALCOM installation page](https://lumakroma.github.io/modular-depth-animation/) | [VPM index.json](https://lumakroma.github.io/modular-depth-animation/index.json)
+
+The published VPM listing uses the unchanged, verified 0.1.0-beta.3.rc.1 ZIP. Enable prerelease packages and add the official VRCFury repository first. Exact dependency versions and migration limitations are documented on the installation page. Older notes stating that no VPM listing exists are historical.
+
 Published prerelease: [0.1.0-beta.3.rc.1](https://github.com/LumaKroma/modular-depth-animation/releases/tag/v0.1.0-beta.3.rc.1). Reinstallation verification has passed; the candidate-era pending note below is superseded. See the release notes for exact supported versions, installation and unverified upgrade/runtime limitations.
 
 ## Release candidate: 0.1.0-beta.3.rc.1
