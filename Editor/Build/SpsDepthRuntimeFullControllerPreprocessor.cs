@@ -3,6 +3,7 @@
 
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -11,7 +12,7 @@ using MDA.SpsDepth;
 
 namespace MDA.SpsDepth.Editor {
     public sealed class SpsDepthRuntimeFullControllerPreprocessor : IVRCSDKPreprocessAvatarCallback {
-        // Run immediately before VRCFury/SPSNDMF preprocessors.
+        // Run immediately before the VRCFury preprocessor.
         public int callbackOrder => -10001;
 
         public bool OnPreprocessAvatar(GameObject avatarGameObject) {
@@ -20,8 +21,14 @@ namespace MDA.SpsDepth.Editor {
                 .Where(i => i != null && i.enabled)
                 .ToArray();
 
-            foreach (var installer in installers) {
-                if (!ProcessInstaller(avatarGameObject, installer)) {
+            if (installers.Length > 0 && !SpsDepthVrcfuryFullControllerFactory.IsAvailable(out var buildError)) {
+                Debug.LogError($"[MDA] {buildError}", avatarGameObject);
+                return false;
+            }
+
+            var cleanedSockets = new HashSet<GameObject>();
+            for (var i = 0; i < installers.Length; i++) {
+                if (!ProcessInstaller(avatarGameObject, installers[i], i, cleanedSockets)) {
                     return false;
                 }
             }
@@ -29,8 +36,13 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
-        private static bool ProcessInstaller(GameObject avatarRoot, SpsDepthRuntimeFullControllerInstaller installer) {
-            var injectedDepthParam = SpsDepthGeneratedNames.GetDepthParamName(installer);
+        private static bool ProcessInstaller(
+            GameObject avatarRoot,
+            SpsDepthRuntimeFullControllerInstaller installer,
+            int batchIndex,
+            HashSet<GameObject> cleanedSockets
+        ) {
+            var injectedDepthParam = SpsDepthGeneratedNames.GetDepthParamName(installer, batchIndex);
 
             var socketStatus = SpsDepthSocketResolver.ResolveForBuild(
                 avatarRoot,
@@ -66,7 +78,8 @@ namespace MDA.SpsDepth.Editor {
                 installer,
                 injectedDepthParam,
                 out var controllerResult,
-                out var controllerError
+                out var controllerError,
+                batchIndex
             )) {
                 Debug.LogError(
                     $"{LogPrefix(installer)} Failed to generate depth AnimatorController.\n{controllerError}",
@@ -75,9 +88,11 @@ namespace MDA.SpsDepth.Editor {
                 return false;
             }
 
-            DeleteExistingGeneratedObject(socketObject.transform);
+            if (cleanedSockets.Add(socketObject)) {
+                DeleteExistingGeneratedObject(socketObject.transform);
+            }
 
-            var generated = new GameObject(SpsDepthGeneratedNames.GeneratedObjectName);
+            var generated = new GameObject(SpsDepthGeneratedNames.GetGeneratedObjectName(batchIndex));
             generated.transform.SetParent(socketObject.transform, false);
             generated.transform.localPosition = Vector3.zero;
             generated.transform.localRotation = Quaternion.identity;
@@ -88,6 +103,7 @@ namespace MDA.SpsDepth.Editor {
                 if (!SpsDepthVrcfuryFullControllerFactory.TryCreate(
                     generated,
                     avatarRoot,
+                    socketObject,
                     controllerResult.Controller,
                     injectedDepthParam,
                     controllerResult.GlobalParameters,
@@ -134,7 +150,8 @@ namespace MDA.SpsDepth.Editor {
 
             for (var i = socketTransform.childCount - 1; i >= 0; i--) {
                 var child = socketTransform.GetChild(i);
-                if (child != null && child.name == SpsDepthGeneratedNames.GeneratedObjectName) {
+                if (child != null && (child.name == SpsDepthGeneratedNames.GeneratedObjectName ||
+                    child.name.StartsWith(SpsDepthGeneratedNames.GeneratedObjectName + "_", StringComparison.Ordinal))) {
                     UnityEngine.Object.DestroyImmediate(child.gameObject);
                 }
             }

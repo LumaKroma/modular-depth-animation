@@ -12,18 +12,23 @@ namespace MDA.SpsDepth.Editor {
         public const string GeneratedObjectName = "__MDA_DepthRuntimeFullController";
         public const string GeneratedAssetFolder = "Assets/MDAGenerated";
 
-        public static string GetDepthParamName(SpsDepthRuntimeFullControllerInstaller installer) {
-            return $"MDA/Depth/{GetStableInstallerId(installer)}";
+        // The caller supplies a unique index per build batch; GlobalObjectId may repeat on unsaved clones.
+        public static string GetGeneratedObjectName(int batchIndex) {
+            return $"{GeneratedObjectName}_{batchIndex}";
         }
 
-        public static string GetControllerPath(GameObject avatarRoot, SpsDepthRuntimeFullControllerInstaller installer) {
+        public static string GetDepthParamName(SpsDepthRuntimeFullControllerInstaller installer, int batchIndex = 0) {
+            return $"MDA/Depth/{GetStableInstallerId(installer)}_{batchIndex}";
+        }
+
+        public static string GetControllerPath(GameObject avatarRoot, SpsDepthRuntimeFullControllerInstaller installer, int batchIndex = 0) {
             var avatarName = avatarRoot != null ? avatarRoot.name : "Avatar";
             return
                 $"{GeneratedAssetFolder}/" +
                 $"{SanitizeObjectName(avatarName)}_" +
                 $"MDA_" +
                 $"{SanitizeObjectName(installer.name)}_" +
-                $"{SanitizeObjectName(GetStableInstallerId(installer))}.controller";
+                $"{SanitizeObjectName(GetStableInstallerId(installer))}_{batchIndex}.controller";
         }
 
         public static string SanitizeObjectName(string value) {

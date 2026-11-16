@@ -151,6 +151,8 @@ namespace MDA.SpsDepth.Editor {
             public const string ResolveTargetObjectNull = "resolve.targetObjectNull";
             public const string ResolveExpectedComponentType = "resolve.expectedComponentType";
             public const string ResolveVrcfurySocketTypeMissing = "resolve.vrcfurySocketTypeMissing";
+            public const string ResolveSpsNdmfUnsupported = "resolve.spsNdmfUnsupported";
+            public const string VrcfuryBuildUnavailable = "vrcfury.buildUnavailable";
         }
 
         [Serializable]

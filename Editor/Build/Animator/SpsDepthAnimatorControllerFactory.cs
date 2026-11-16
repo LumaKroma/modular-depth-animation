@@ -16,7 +16,8 @@ namespace MDA.SpsDepth.Editor {
             SpsDepthRuntimeFullControllerInstaller installer,
             string injectedDepthParam,
             out SpsDepthAnimatorControllerBuildResult result,
-            out string error
+            out string error,
+            int batchIndex = 0
         ) {
             result = null;
             error = null;
@@ -27,7 +28,7 @@ namespace MDA.SpsDepth.Editor {
 
             EnsureGeneratedAssetFolder();
 
-            var controllerPath = SpsDepthGeneratedNames.GetControllerPath(avatarRoot, installer);
+            var controllerPath = SpsDepthGeneratedNames.GetControllerPath(avatarRoot, installer, batchIndex);
             AssetDatabase.DeleteAsset(controllerPath);
 
             var animatorController = AnimatorController.CreateAnimatorControllerAtPath(controllerPath);

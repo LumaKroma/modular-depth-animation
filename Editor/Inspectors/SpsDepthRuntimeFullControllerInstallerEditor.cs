@@ -117,6 +117,9 @@ namespace MDA.SpsDepth.Editor {
 
         private void DrawTargetSocket() {
             EditorGUILayout.LabelField(SpsDepthLocalization.T(SpsDepthLocalization.Key.TargetSocket), EditorStyles.boldLabel);
+            if (!SpsDepthVrcfuryFullControllerFactory.IsAvailable(out var buildError)) {
+                EditorGUILayout.HelpBox(buildError, MessageType.Error);
+            }
             EditorGUILayout.HelpBox(
                 SpsDepthLocalization.T(SpsDepthLocalization.Key.TargetSocketHelp),
                 MessageType.Info

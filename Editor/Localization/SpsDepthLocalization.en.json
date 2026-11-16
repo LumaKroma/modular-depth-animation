@@ -9,7 +9,7 @@
     { "key": "targetSocket", "value": "Target Socket" },
     { "key": "targetSocket.help", "value": "If Target Socket Object is assigned, MDA uses it directly and does not search. If it is empty, MDA auto-detects the selected socket type at build time." },
     { "key": "targetSocketObject.invalid.title", "value": "Invalid Target Socket" },
-    { "key": "targetSocketObject.invalid.message", "value": "Target Socket Object must have a VRCFury or SPS for NDMF socket component.\n\n{0}" },
+    { "key": "targetSocketObject.invalid.message", "value": "Target Socket Object must have a VRCFury SPS socket component and the full VRCFury build tools must be installed.\n\n{0}" },
     { "key": "targetSocketObject.missing", "value": "Target Socket Object reference is missing." },
     { "key": "autoDetectType", "value": "Auto Detect Type" },
     { "key": "autoDetectSocket", "value": "Auto Detect Socket" },
@@ -125,13 +125,15 @@
     { "key": "resolve.autoInspectDetected", "value": "Detected {0} SPS Socket: {1}" },
     { "key": "resolve.autoInspectMissing", "value": "No {0} SPS Socket was found under {1}. Details: {2}" },
     { "key": "resolve.explicitOutsideAvatar", "value": "Target Socket Object must be the avatar root or one of its children. Assigned object: {0}" },
-    { "key": "resolve.explicitMissingSocket", "value": "Target Socket Object does not have a VRCFury or SPS for NDMF socket component. {0} Assigned object: {1}" },
+    { "key": "resolve.explicitMissingSocket", "value": "Target Socket Object cannot be used. {0} Assigned object: {1}" },
     { "key": "resolve.explicitUsing", "value": "Using assigned socket: {0}" },
     { "key": "resolve.foundKnownPath", "value": "Found by known path: {0}" },
     { "key": "resolve.foundObjectName", "value": "Found by object name: {0}" },
     { "key": "resolve.noMatchingSocket", "value": "No matching {0} socket was found." },
     { "key": "resolve.targetObjectNull", "value": "Target object is null." },
     { "key": "resolve.expectedComponentType", "value": "Expected component type: {0}." },
-    { "key": "resolve.vrcfurySocketTypeMissing", "value": "No supported SPS Socket type was found. Is VRCFury or SPS for NDMF installed and compiled?" }
+    { "key": "resolve.vrcfurySocketTypeMissing", "value": "The VRCFury SPS Socket type was not found. Is VRCFury installed and compiled?" },
+    { "key": "resolve.spsNdmfUnsupported", "value": "SPS for NDMF sockets are not supported. Assign a VRCFury SPS Socket. MDA will not fall back to another socket for this explicit assignment." },
+    { "key": "vrcfury.buildUnavailable", "value": "The full VRCFury build tools are required. The VRCFury Editor builder or required runtime types were not found. Install VRCFury and wait for compilation to finish. VRCFury Stub (vfstub) and SPS for NDMF are not supported." }
   ]
 }

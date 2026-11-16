@@ -12,43 +12,27 @@ using UnityEngine;
 
 namespace MDA.SpsDepth.Editor {
     internal static class SpsDepthVrcfuryFullControllerFactory {
-        private sealed class FullControllerProvider {
-            public readonly string DisplayName;
-            public readonly string VrcfuryTypeName;
-            public readonly string FullControllerTypeName;
-            public readonly string SocketTypeName;
+        private const string VrcfuryTypeName = "VF.Model.VRCFury";
+        private const string FullControllerTypeName = "VF.Model.Feature.FullController";
 
-            public FullControllerProvider(
-                string displayName,
-                string vrcfuryTypeName,
-                string fullControllerTypeName,
-                string socketTypeName
-            ) {
-                DisplayName = displayName;
-                VrcfuryTypeName = vrcfuryTypeName;
-                FullControllerTypeName = fullControllerTypeName;
-                SocketTypeName = socketTypeName;
+        public static bool IsAvailable(out string error) {
+            // vfstub has VF runtime models, but cannot build a Full Controller.
+            var builderType = Type.GetType("VF.Builder.VRCFuryBuilder, VRCFury-Editor-Avatars", false);
+            if (builderType == null || FindType(VrcfuryTypeName) == null ||
+                FindType(FullControllerTypeName) == null ||
+                FindType("VF.Component.VRCFuryHapticSocket") == null) {
+                error = SpsDepthLocalization.T(SpsDepthLocalization.Key.VrcfuryBuildUnavailable);
+                return false;
             }
-        }
 
-        private static readonly FullControllerProvider[] Providers = {
-            new FullControllerProvider(
-                "VRCFury",
-                "VF.Model.VRCFury",
-                "VF.Model.Feature.FullController",
-                "VF.Component.VRCFuryHapticSocket"
-            ),
-            new FullControllerProvider(
-                "SPS for NDMF",
-                "SpsNdmf.Model.VRCFury",
-                "SpsNdmf.Model.Feature.FullController",
-                "SpsNdmf.Component.VRCFuryHapticSocket"
-            )
-        };
+            error = null;
+            return true;
+        }
 
         public static bool TryCreate(
             GameObject targetObject,
             GameObject avatarRoot,
+            GameObject socketObject,
             RuntimeAnimatorController controller,
             string injectSpsDepthParam,
             IEnumerable<string> globalParameters,
@@ -66,22 +50,12 @@ namespace MDA.SpsDepth.Editor {
                 return false;
             }
 
-            if (!TryResolveProvider(targetObject, out var provider, out var providerError)) {
-                error = providerError;
+            if (!IsAvailable(out error)) {
                 return false;
             }
 
-            var vrcfuryType = FindType(provider.VrcfuryTypeName);
-            if (vrcfuryType == null) {
-                error = $"Could not find {provider.DisplayName} component type: {provider.VrcfuryTypeName}.";
-                return false;
-            }
-
-            var fullControllerType = FindType(provider.FullControllerTypeName);
-            if (fullControllerType == null) {
-                error = $"Could not find {provider.DisplayName} FullController feature type: {provider.FullControllerTypeName}.";
-                return false;
-            }
+            var vrcfuryType = FindType(VrcfuryTypeName);
+            var fullControllerType = FindType(FullControllerTypeName);
 
             var vrcfuryComponent = targetObject.GetComponent(vrcfuryType) ?? targetObject.AddComponent(vrcfuryType);
             if (vrcfuryComponent == null) {
@@ -105,8 +79,7 @@ namespace MDA.SpsDepth.Editor {
             SetField(featureInstance, "rootBindingsApplyToAvatar", true);
             SetGlobalParameters(featureInstance, globalParameters);
 
-            if (!SetField(featureInstance, "injectSpsDepthParam", injectSpsDepthParam)) {
-                error = $"Could not assign injectSpsDepthParam on {fullControllerType.FullName}.";
+            if (!SetDepthInjection(featureInstance, socketObject, injectSpsDepthParam, out error)) {
                 return false;
             }
 
@@ -120,47 +93,44 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
-        private static bool TryResolveProvider(
-            GameObject targetObject,
-            out FullControllerProvider provider,
-            out string error
-        ) {
-            provider = null;
+        private static bool SetDepthInjection(object fullController, GameObject socketObject, string parameter, out string error) {
             error = null;
-
-            provider = FindProviderFromSocketAncestor(targetObject);
-            if (provider != null) {
-                return true;
+            if (socketObject == null || string.IsNullOrWhiteSpace(parameter)) {
+                error = "A resolved SPS socket and depth parameter are required.";
+                return false;
             }
 
-            provider = Providers.FirstOrDefault(p =>
-                FindType(p.VrcfuryTypeName) != null &&
-                FindType(p.FullControllerTypeName) != null
-            );
-            if (provider != null) {
-                return true;
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var field = fullController.GetType().GetField("injectParams", flags);
+            if (field == null) {
+                // Older full VRCFury releases resolve the nearest parent socket.
+                // The generated object remains a direct child of the resolved socket.
+                if (SetField(fullController, "injectSpsDepthParam", parameter)) return true;
+                error = "VRCFury does not expose a supported SPS depth injection field.";
+                return false;
             }
 
-            error =
-                "Could not find a supported Full Controller provider. " +
-                "Install VRCFury or SPS for NDMF and wait for Unity compilation to finish.";
-            return false;
-        }
-
-        private static FullControllerProvider FindProviderFromSocketAncestor(GameObject targetObject) {
-            var current = targetObject != null ? targetObject.transform : null;
-            while (current != null) {
-                foreach (var provider in Providers) {
-                    var socketType = FindType(provider.SocketTypeName);
-                    if (socketType != null && current.gameObject.GetComponent(socketType) != null) {
-                        return provider;
-                    }
+            try {
+                var entryType = GetListElementType(field.FieldType);
+                var entries = field.GetValue(fullController) as IList;
+                if (entryType == null || entries == null) {
+                    error = "Unsupported FullController.injectParams list.";
+                    return false;
                 }
-
-                current = current.parent;
+                var entry = Activator.CreateInstance(entryType);
+                // Same plug-length units as the legacy injectSpsDepthParam path.
+                if (!SetField(entry, "sourceObject", socketObject) ||
+                    !SetField(entry, "sourceParam", "__sps_depth_plug_lengths") ||
+                    !SetField(entry, "targetParam", parameter)) {
+                    error = "Unsupported VRCFury InjectParamEntry fields.";
+                    return false;
+                }
+                entries.Add(entry);
+                return true;
+            } catch (Exception e) {
+                error = $"Failed to configure VRCFury SPS depth injection.\n{e}";
+                return false;
             }
-
-            return null;
         }
 
         private static void SetGlobalParameters(object fullController, IEnumerable<string> globalParameters) {

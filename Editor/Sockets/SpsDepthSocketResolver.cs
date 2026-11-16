@@ -32,10 +32,7 @@ namespace MDA.SpsDepth.Editor {
             }
         }
 
-        private static readonly string[] SocketTypeNames = {
-            "VF.Component.VRCFuryHapticSocket",
-            "SpsNdmf.Component.VRCFuryHapticSocket"
-        };
+        private const string SocketTypeName = "VF.Component.VRCFuryHapticSocket";
 
         private static readonly SocketPresetDefinition[] PresetDefinitions = {
             new SocketPresetDefinition(SpsDepthRuntimeFullControllerInstaller.SocketPreset.Mouth, "Mouth", "Blow", "Blowjob", "Oral", "Head"),
@@ -67,6 +64,10 @@ namespace MDA.SpsDepth.Editor {
             var hasMissingTargetSocketReference = HasMissingTargetSocketReference(installer);
             if (!hasMissingTargetSocketReference && installer.targetSocketObject != null) {
                 return ResolveExplicitSocket(avatarRoot, installer.targetSocketObject, out socketObject, out message);
+            }
+
+            if (!SpsDepthVrcfuryFullControllerFactory.IsAvailable(out message)) {
+                return ResolveStatus.Error;
             }
 
             if (TryFindSocket(avatarRoot, installer.socketPreset, out socketObject, out message)) {
@@ -205,13 +206,13 @@ namespace MDA.SpsDepth.Editor {
             socketObject = null;
             message = null;
 
-            if (!TryGetSocketTypes(out var socketTypes, out var socketTypeError)) {
+            if (!TryGetSocketType(out var socketType, out var socketTypeError)) {
                 message = socketTypeError;
                 return false;
             }
 
             var definition = GetDefinition(preset);
-            socketObject = FindByKnownPath(avatarRoot.transform, socketTypes, definition);
+            socketObject = FindByKnownPath(avatarRoot.transform, socketType, definition);
             if (socketObject != null) {
                 message = SpsDepthLocalization.Format(
                     SpsDepthLocalization.Key.ResolveFoundKnownPath,
@@ -220,7 +221,7 @@ namespace MDA.SpsDepth.Editor {
                 return true;
             }
 
-            socketObject = FindByObjectName(avatarRoot, socketTypes, definition);
+            socketObject = FindByObjectName(avatarRoot, socketType, definition);
             if (socketObject != null) {
                 message = SpsDepthLocalization.Format(
                     SpsDepthLocalization.Key.ResolveFoundObjectName,
@@ -238,12 +239,12 @@ namespace MDA.SpsDepth.Editor {
 
         private static GameObject FindByKnownPath(
             Transform avatarRoot,
-            Type[] socketTypes,
+            Type socketType,
             SocketPresetDefinition definition
         ) {
             foreach (var path in GetKnownRelativePaths(definition)) {
                 var transform = avatarRoot.Find(path);
-                if (transform != null && HasSocketComponent(transform.gameObject, socketTypes)) {
+                if (transform != null && transform.gameObject.GetComponent(socketType) != null) {
                     return transform.gameObject;
                 }
             }
@@ -253,14 +254,14 @@ namespace MDA.SpsDepth.Editor {
 
         private static GameObject FindByObjectName(
             GameObject avatarRoot,
-            Type[] socketTypes,
+            Type socketType,
             SocketPresetDefinition definition
         ) {
             var bestScore = 0;
             GameObject bestSocket = null;
             var sockets = avatarRoot
                 .GetComponentsInChildren<Component>(true)
-                .Where(c => c != null && socketTypes.Any(t => t.IsInstanceOfType(c)))
+                .Where(c => c != null && socketType.IsInstanceOfType(c))
                 .ToArray();
 
             foreach (var socketComponent in sockets) {
@@ -322,14 +323,20 @@ namespace MDA.SpsDepth.Editor {
                 return false;
             }
 
-            if (!TryGetSocketTypes(out var socketTypes, out error)) {
+            if (targetObject.GetComponents<Component>().Any(c => c != null &&
+                c.GetType().FullName == "SpsNdmf.Component.VRCFuryHapticSocket")) {
+                error = SpsDepthLocalization.T(SpsDepthLocalization.Key.ResolveSpsNdmfUnsupported);
                 return false;
             }
 
-            if (!HasSocketComponent(targetObject, socketTypes)) {
+            if (!TryGetSocketType(out var socketType, out error)) {
+                return false;
+            }
+
+            if (targetObject.GetComponent(socketType) == null) {
                 error = SpsDepthLocalization.Format(
                     SpsDepthLocalization.Key.ResolveExpectedComponentType,
-                    string.Join(" / ", socketTypes.Select(t => t.FullName))
+                    socketType.FullName
                 );
                 return false;
             }
@@ -337,26 +344,19 @@ namespace MDA.SpsDepth.Editor {
             return true;
         }
 
-        private static bool TryGetSocketTypes(out Type[] socketTypes, out string error) {
-            socketTypes = SocketTypeNames
-                .Select(FindType)
-                .Where(t => t != null)
-                .Distinct()
-                .ToArray();
-            error = null;
+        private static bool TryGetSocketType(out Type socketType, out string error) {
+            socketType = null;
+            if (!SpsDepthVrcfuryFullControllerFactory.IsAvailable(out error)) {
+                return false;
+            }
 
-            if (socketTypes.Length == 0) {
+            socketType = FindType(SocketTypeName);
+            if (socketType == null) {
                 error = SpsDepthLocalization.T(SpsDepthLocalization.Key.ResolveVrcfurySocketTypeMissing);
                 return false;
             }
 
             return true;
-        }
-
-        private static bool HasSocketComponent(GameObject targetObject, Type[] socketTypes) {
-            return targetObject != null &&
-                socketTypes != null &&
-                socketTypes.Any(t => t != null && targetObject.GetComponent(t) != null);
         }
 
         private static Type FindType(string fullName) {
@@ -416,11 +416,31 @@ namespace MDA.SpsDepth.Editor {
             score = Math.Max(score, GetTextMatchScore(GetStringField(socketComponent, "name"), aliases, 120));
             score = Math.Max(score, GetTextMatchScore(GetStringField(socketComponent, "oscId"), aliases, 80));
 
-            foreach (var tag in GetStringListField(socketComponent, "tags")) {
+            foreach (var tag in GetSocketChannels(socketComponent)) {
                 score = Math.Max(score, GetTextMatchScore(tag, aliases, 160));
             }
 
             return score;
+        }
+
+        private static IEnumerable<string> GetSocketChannels(Component socketComponent) {
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var type = socketComponent.GetType();
+            var settings = type.GetField("channelSettings", flags)?.GetValue(socketComponent);
+            var channels = settings?.GetType().GetField("channels", flags)?.GetValue(settings)
+                as System.Collections.IEnumerable;
+            if (channels != null) {
+                foreach (var channel in channels) {
+                    var id = GetStringField(channel, "id");
+                    if (!string.IsNullOrWhiteSpace(id)) yield return id;
+                }
+            }
+
+            // VRCFury retains obsolete tags after migration. Do not let a stale
+            // tag override a channel the user subsequently renamed or removed.
+            var migrated = type.GetField("tagsUpgradedToChannels", flags)?.GetValue(socketComponent);
+            if (migrated is bool upgraded && upgraded) yield break;
+            foreach (var tag in GetStringListField(socketComponent, "tags")) yield return tag;
         }
 
         private static int GetTextMatchScore(string value, IEnumerable<string> aliases, int baseScore) {
