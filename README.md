@@ -1,3 +1,5 @@
+Published prerelease: [0.1.0-beta.3.rc.1](https://github.com/LumaKroma/modular-depth-animation/releases/tag/v0.1.0-beta.3.rc.1). Reinstallation verification has passed; the candidate-era pending note below is superseded. See the release notes for exact supported versions, installation and unverified upgrade/runtime limitations.
+
 ## Release candidate: 0.1.0-beta.3.rc.1
 
 Target: Unity 2022.3.22f1, full VRCFury 1.1470.0, VRChat SDK Base / Avatars 3.10.6. Older Fury compatibility is unverified and outside this candidate target. SPS for NDMF and VRCFury Stub are not substitutes. No third-party dependencies are bundled in the distribution ZIP.
